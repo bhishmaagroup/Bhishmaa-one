@@ -20,4 +20,4 @@ if __name__ == '__main__':
         seed_roles_and_permissions()
         
     print(f"Bhishmaa One running in {config_name} mode on http://127.0.0.1:5000")
-    app.run(host='127.0.0.1', port=5000)
+    app.run(host='0.0.0.0', port=5000)
