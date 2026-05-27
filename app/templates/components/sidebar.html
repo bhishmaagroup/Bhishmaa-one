@@ -1,10 +1,14 @@
 <aside class="app-sidebar" id="appSidebar">
     <!-- Brand Info -->
-    <div class="sidebar-brand d-flex align-items-center gap-2 px-4">
-        <div class="brand-logo-icon">
-            <i class="bi bi-activity text-white"></i>
+    <div class="sidebar-brand d-flex align-items-center gap-2 px-3" style="height: 70px;">
+        <img src="{{ url_for('static', filename='img/logo.png') }}"
+             alt="Bhishmaa Group"
+             style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(99,102,241,0.4);box-shadow:0 0 12px rgba(99,102,241,0.3);flex-shrink:0;"
+             class="brand-logo-img">
+        <div class="brand-text d-flex flex-column" style="line-height:1.15;">
+            <span class="text-white fw-bold" style="font-size:15px;letter-spacing:-0.3px;">Bhishmaa One</span>
+            <span style="font-size:10px;color:#6366f1;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;">by Bhishmaa Group</span>
         </div>
-        <span class="brand-text text-white fw-bold">Bhishmaa One</span>
         <button class="btn text-white ms-auto d-lg-none border-0 p-0" onclick="toggleSidebar()" type="button" aria-label="Close sidebar">
             <i class="bi bi-x-lg fs-5"></i>
         </button>
