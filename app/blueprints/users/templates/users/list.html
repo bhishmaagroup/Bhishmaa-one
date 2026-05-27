@@ -1,0 +1,148 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Manage Staff - Bhishmaa One{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('users.list_users') }}">Users</a></li>
+<li class="breadcrumb-item active" aria-current="page">Staff Directory</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main">Staff & Employees</h2>
+        <p class="text-muted small mb-0">Manage accounts and permissions for your team members</p>
+    </div>
+    <div>
+        <a href="{{ url_for('users.create') }}" class="btn btn-indigo rounded-3 d-flex align-items-center gap-2">
+            <i class="bi bi-person-plus"></i>
+            <span>Add Staff Member</span>
+        </a>
+    </div>
+</div>
+
+{% if new_credentials %}
+<div class="card border border-success bg-success-light rounded-4 mb-4 shadow-sm">
+    <div class="card-body p-4">
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="bg-success text-white rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                <i class="bi bi-shield-check fs-4"></i>
+            </div>
+            <div>
+                <h5 class="fw-bold text-success mb-1">Staff Credentials Generated Successfully</h5>
+                <p class="text-muted small mb-0">Please share these login credentials securely with the employee. For security, this temporary password will not be shown again.</p>
+            </div>
+        </div>
+        <div class="row g-3 bg-white rounded-3 p-3 border">
+            <div class="col-md-4">
+                <span class="text-muted small d-block">Employee Name</span>
+                <strong class="text-main">{{ new_credentials.first_name }} {{ new_credentials.last_name }}</strong>
+            </div>
+            <div class="col-md-4">
+                <span class="text-muted small d-block">Username / ID</span>
+                <div class="d-flex align-items-center gap-2">
+                    <strong class="text-main font-monospace" id="newUsername">{{ new_credentials.username }}</strong>
+                    <button class="btn btn-link p-0 text-muted" type="button" onclick="navigator.clipboard.writeText('{{ new_credentials.username }}'); alert('Username copied!')" title="Copy Username">
+                        <i class="bi bi-copy"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <span class="text-muted small d-block">Email Address</span>
+                <div class="d-flex align-items-center gap-2">
+                    <strong class="text-main" id="newEmail">{{ new_credentials.email }}</strong>
+                    <button class="btn btn-link p-0 text-muted" type="button" onclick="navigator.clipboard.writeText('{{ new_credentials.email }}'); alert('Email copied!')" title="Copy Email">
+                        <i class="bi bi-copy"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-12 mt-2 border-top pt-2">
+                <span class="text-muted small d-block">Temporary Password</span>
+                <div class="d-flex align-items-center gap-2">
+                    <strong class="text-success fs-5 font-monospace" id="newPassword">{{ new_credentials.password }}</strong>
+                    <button class="btn btn-link p-0 text-muted" type="button" onclick="navigator.clipboard.writeText('{{ new_credentials.password }}'); alert('Password copied!')" title="Copy Password">
+                        <i class="bi bi-copy"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <!-- Filter Search Bar Header -->
+    <div class="card-header bg-transparent border-0 px-4 pt-4 pb-2">
+        <form method="GET" action="" class="row g-2 justify-content-start align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" value="{{ q }}" class="form-control bg-light border-start-0" placeholder="Search staff by name, role..."/>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-indigo rounded-3 px-3 fw-semibold">Search</button>
+                {% if q %}
+                    <a href="{{ url_for('users.list_users') }}" class="btn btn-light rounded-3 px-2 border ms-1" title="Clear Filter">&times;</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    
+    <!-- Table list body -->
+    <div class="card-body px-4 pb-4">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="border-0 rounded-start-3">Name</th>
+                        <th class="border-0">Username</th>
+                        <th class="border-0">Email</th>
+                        <th class="border-0">Designation</th>
+                        <th class="border-0">Department</th>
+                        <th class="border-0">Roles</th>
+                        <th class="border-0">Status</th>
+                        <th class="border-0 rounded-end-3 text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if staff %}
+                        {% for member in staff %}
+                        <tr>
+                            <td class="fw-bold text-main">{{ member.first_name }} {{ member.last_name }}</td>
+                            <td><span class="text-muted font-monospace small">@{{ member.username }}</span></td>
+                            <td>{{ member.email }}</td>
+                            <td>{{ member.detail.designation if member.detail else 'Staff' }}</td>
+                            <td>{{ member.detail.department if member.detail else 'Operations' }}</td>
+                            <td>
+                                {% for role in member.roles %}
+                                    <span class="badge bg-indigo-light text-indigo me-1">{{ role.name }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% if member.is_active %}
+                                    <span class="badge bg-success-light text-success rounded-pill px-3 py-2">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger-light text-danger rounded-pill px-3 py-2">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ url_for('users.details', user_id=member.id) }}" class="btn btn-icon btn-light rounded-circle me-1" title="View Details"><i class="bi bi-eye"></i></a>
+                                <a href="{{ url_for('users.edit', user_id=member.id) }}" class="btn btn-icon btn-light rounded-circle" title="Edit Profile"><i class="bi bi-pencil"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-people fs-1 mb-2 d-block"></i>
+                                <span>No staff profiles found. Onboard staff to get started.</span>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

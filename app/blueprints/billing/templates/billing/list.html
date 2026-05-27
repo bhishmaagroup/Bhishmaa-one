@@ -1,0 +1,112 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Sales Invoices - Bhishmaa One{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('billing.list_invoices') }}">Billing</a></li>
+<li class="breadcrumb-item active" aria-current="page">Invoice Registry</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main">Sales Invoices</h2>
+        <p class="text-muted small mb-0">Monitor transactions, process bills, and print tax invoices</p>
+    </div>
+    <div>
+        <a href="{{ url_for('billing.create') }}" class="btn btn-indigo rounded-3 d-flex align-items-center gap-2">
+            <i class="bi bi-calculator"></i>
+            <span>Launch POS Terminal</span>
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <!-- Filter Search Bar -->
+    <div class="card-header bg-transparent border-0 px-4 pt-4 pb-2">
+        <form method="GET" action="" class="row g-2 justify-content-start align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="search" value="{{ request.args.get('search', '') }}" class="form-control bg-light border-start-0" placeholder="Search client name or Invoice ID..."/>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select bg-light" onchange="this.form.submit()">
+                    <option value="">All Statuses</option>
+                    <option value="Paid" {% if request.args.get('status') == 'Paid' %}selected{% endif %}>Paid</option>
+                    <option value="Unpaid" {% if request.args.get('status') == 'Unpaid' %}selected{% endif %}>Unpaid</option>
+                    <option value="Partial" {% if request.args.get('status') == 'Partial' %}selected{% endif %}>Partial</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-indigo rounded-3 px-3 fw-semibold">Search</button>
+                {% if request.args.get('search') or request.args.get('status') %}
+                    <a href="{{ url_for('billing.list_invoices') }}" class="btn btn-light rounded-3 px-2 border ms-1" title="Clear Filters">&times;</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    
+    <!-- Invoices Table -->
+    <div class="card-body px-4 pb-4">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="border-0 rounded-start-3">Invoice Number</th>
+                        <th class="border-0">Customer</th>
+                        <th class="border-0">Phone</th>
+                        <th class="border-0">Date</th>
+                        <th class="border-0">Payment Mode</th>
+                        <th class="border-0">Total Amount</th>
+                        <th class="border-0">Status</th>
+                        <th class="border-0 rounded-end-3 text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if invoices %}
+                        {% for invoice in invoices %}
+                        <tr>
+                            <td class="fw-bold text-main font-monospace small">{{ invoice.invoice_number }}</td>
+                            <td class="fw-semibold">{{ invoice.customer_name }}</td>
+                            <td><span class="text-muted small">{{ invoice.customer_phone or "-" }}</span></td>
+                            <td><span class="small">{{ invoice.created_at.strftime('%d-%b-%Y %I:%M %p') }}</span></td>
+                            <td><span class="badge bg-light text-dark">{{ invoice.payment_mode }}</span></td>
+                            <td class="fw-bold text-main">₹ {{ "{:,.2f}".format(invoice.total_amount) }}</td>
+                            <td>
+                                {% if invoice.status == 'Paid' %}
+                                    <span class="badge bg-success-light text-success rounded-pill px-3 py-1.5 small">Paid</span>
+                                {% elif invoice.status == 'Partial' %}
+                                    <span class="badge bg-warning-light text-warning rounded-pill px-3 py-1.5 small">Partial</span>
+                                {% else %}
+                                    <span class="badge bg-danger-light text-danger rounded-pill px-3 py-1.5 small">Unpaid</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ url_for('billing.details', invoice_id=invoice.id) }}" class="btn btn-icon btn-light rounded-circle me-1" title="View Details">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('billing.edit_invoice_route', invoice_id=invoice.id) }}" class="btn btn-icon btn-light rounded-circle me-1" title="Edit Invoice">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{{ url_for('billing.print_invoice', invoice_id=invoice.id) }}" target="_blank" class="btn btn-icon btn-light rounded-circle" title="Print Invoice">
+                                    <i class="bi bi-printer"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-calculator fs-1 mb-2 d-block"></i>
+                                <span>No invoices found. Generate bills in the POS terminal to populate this table.</span>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

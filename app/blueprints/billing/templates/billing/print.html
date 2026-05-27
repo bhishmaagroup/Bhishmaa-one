@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Invoice - {{ invoice.invoice_number }}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #333;
+            background-color: #fff;
+            padding: 30px;
+        }
+        .invoice-title {
+            font-weight: 800;
+            color: #4f46e5;
+            letter-spacing: -1px;
+        }
+        .table {
+            margin-top: 20px;
+        }
+        .table thead th {
+            background-color: #f3f4f6 !important;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .totals-box {
+            background-color: #f9fafb;
+            border-radius: 8px;
+            padding: 15px;
+            max-width: 400px;
+            margin-left: auto;
+        }
+        .divider {
+            border-top: 1px dashed #cbd5e1;
+            margin: 20px 0;
+        }
+        @media print {
+            body {
+                padding: 0;
+            }
+            /* Ensure the controls and any of their children are fully hidden when printing */
+            .no-print,
+            .no-print * {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                overflow: hidden !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Print / Close Controls -->
+        <div class="d-flex justify-content-between align-items-center mb-4 no-print border-bottom pb-3">
+            <span class="text-muted small"><i class="bi bi-info-circle"></i> Print preview mode. Press Ctrl+P to print.</span>
+            <div>
+                <button onclick="window.print();" class="btn btn-primary btn-sm px-3 fw-bold">Print Invoice</button>
+                <button onclick="window.close();" class="btn btn-outline-secondary btn-sm px-3 ms-2">Close Tab</button>
+            </div>
+        </div>
+
+        <!-- Invoice Header -->
+        <div class="row align-items-center mb-4">
+            <div class="col-6">
+                <h2 class="invoice-title mb-1">TAX INVOICE</h2>
+                <span class="font-monospace text-muted">{{ invoice.invoice_number }}</span>
+            </div>
+            <div class="col-6 text-end">
+                <h4 class="fw-bold text-dark m-0">{{ current_user.organization.name }}</h4>
+                <span class="text-muted small">Date: {{ invoice.created_at.strftime('%d-%b-%Y %I:%M %p') }}</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Billing Addresses -->
+        <div class="row g-4 mb-4">
+            <div class="col-6">
+                <h6 class="text-uppercase fw-bold text-muted small">Seller Details</h6>
+                <p class="small m-0">
+                    <strong>{{ current_user.organization.name }}</strong><br>
+                    <strong>GSTIN:</strong> {{ org_detail.gstin if (org_detail and org_detail.gstin) else "None" }}<br>
+                    <strong>State Code:</strong> {{ org_detail.state_code if (org_detail and org_detail.state_code) else "07" }}<br>
+                    Address: {{ org_detail.billing_address if (org_detail and org_detail.billing_address) else "-" }}<br>
+                    Phone: {{ org_detail.billing_phone or "-" }}
+                </p>
+            </div>
+            
+            <div class="col-6 text-end">
+                <h6 class="text-uppercase fw-bold text-muted small">Buyer Details</h6>
+                <p class="small m-0">
+                    <strong>{{ invoice.customer_name }}</strong><br>
+                    Phone: {{ invoice.customer_phone or "-" }}<br>
+                    <strong>GSTIN:</strong> {{ invoice.customer_gstin or "-" }}<br>
+                    <strong>State Code:</strong> {{ invoice.customer_state_code or "-" }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <table class="table table-bordered table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Product / Service Description</th>
+                    <th class="text-center" style="width: 100px;">Rate (₹)</th>
+                    <th class="text-center" style="width: 70px;">Qty</th>
+                    <th class="text-center" style="width: 80px;">GST (%)</th>
+                    <th class="text-center" style="width: 100px;">CGST (₹)</th>
+                    <th class="text-center" style="width: 100px;">SGST (₹)</th>
+                    <th class="text-center" style="width: 100px;">IGST (₹)</th>
+                    <th class="text-end" style="width: 120px;">Total (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in invoice.items %}
+                <tr>
+                    <td class="fw-bold">{{ item.product_name }}</td>
+                    <td class="text-center">{{ "{:,.2f}".format(item.unit_price) }}</td>
+                    <td class="text-center">{{ item.quantity }}</td>
+                    <td class="text-center">{{ item.gst_rate }}%</td>
+                    <td class="text-center">{{ "{:,.2f}".format(item.cgst_amount) }}</td>
+                    <td class="text-center">{{ "{:,.2f}".format(item.sgst_amount) }}</td>
+                    <td class="text-center">{{ "{:,.2f}".format(item.igst_amount) }}</td>
+                    <td class="text-end fw-bold">{{ "{:,.2f}".format(item.total_amount) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Summary section -->
+        <div class="row mt-4">
+            <div class="col-8">
+                <p class="text-muted small">
+                    <strong>Terms & Conditions:</strong><br>
+                    1. Goods once sold will not be taken back.<br>
+                    2. Payment mode resolved: {{ invoice.payment_mode }}.<br>
+                    3. Under jurisdiction state code: {{ invoice.customer_state_code }}.
+                </p>
+            </div>
+            <div class="col-4">
+                <div class="totals-box">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Taxable Subtotal:</span>
+                        <span class="small">₹ {{ "{:,.2f}".format(invoice.sub_total) }}</span>
+                    </div>
+                    {% if invoice.cgst > 0 or invoice.sgst > 0 %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">CGST Split:</span>
+                        <span class="small">₹ {{ "{:,.2f}".format(invoice.cgst) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">SGST Split:</span>
+                        <span class="small">₹ {{ "{:,.2f}".format(invoice.sgst) }}</span>
+                    </div>
+                    {% endif %}
+                    {% if invoice.igst > 0 %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">IGST Split:</span>
+                        <span class="small">₹ {{ "{:,.2f}".format(invoice.igst) }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Amount Paid:</span>
+                        <span class="small">₹ {{ "{:,.2f}".format(invoice.amount_paid) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Amount Due:</span>
+                        <span class="small">₹ {{ "{:,.2f}".format(invoice.get_pending_amount()) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 text-danger">
+                        <span class="small">Discount:</span>
+                        <span class="small">- ₹ {{ "{:,.2f}".format(invoice.discount) }}</span>
+                    </div>
+                    <div class="divider my-2"></div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">Grand Total:</span>
+                        <span class="fs-5 fw-bold text-primary">₹ {{ "{:,.2f}".format(invoice.total_amount) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Signatures -->
+        <div class="row mt-5 pt-4">
+            <div class="col-6">
+                <p class="small text-muted mb-0">Customer Signature</p>
+                <div style="border-bottom: 1px solid #ccc; width: 200px; height: 40px;"></div>
+            </div>
+            <div class="col-6 text-end">
+                <p class="small text-muted mb-0">For {{ current_user.organization.name }}</p>
+                <div class="d-inline-block" style="border-bottom: 1px solid #ccc; width: 200px; height: 40px;"></div>
+                <p class="small text-muted mt-1">(Authorised Signatory)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto trigger print -->
+    <script>
+        window.addEventListener("DOMContentLoaded", function() {
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}POS Terminal - Bhishmaa One{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('billing.static', filename='css/billing.css') }}">
+{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('billing.list_invoices') }}">Billing</a></li>
+<li class="breadcrumb-item active" aria-current="page">POS Terminal</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main"><i class="bi bi-calculator me-2"></i>POS Invoicing</h2>
+        <p class="text-muted small mb-0">Indian GST-compliant instant billing & checkout system</p>
+    </div>
+    <div>
+        <a href="{{ url_for('billing.list_invoices') }}" class="btn btn-light border rounded-3 px-3 fw-semibold">
+            <i class="bi bi-arrow-left me-1"></i> Back to Invoices
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: POS Table & Item entry -->
+    <div class="col-lg-8">
+        <!-- Add Item entry bar -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-transparent border-0 px-4 pt-4">
+                <h5 class="fw-bold text-main mb-0">Add Item / Product</h5>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <div class="row g-2 align-items-end" id="addItemForm">
+                    <div class="col-md-4 position-relative">
+                        <label class="form-label small fw-medium">Item Name</label>
+                        <input type="text" id="itemName" class="form-control rounded-3" placeholder="e.g. Paracetamol 500mg, Consultation" autocomplete="off">
+                        <div id="itemSuggestions" class="list-group position-absolute w-100 shadow-sm d-none" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-medium">Unit Price (₹)</label>
+                        <input type="number" id="itemPrice" class="form-control rounded-3" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-medium">Quantity</label>
+                        <input type="number" id="itemQty" class="form-control rounded-3" value="1" min="1" step="1">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-medium">GST Rate (%)</label>
+                        <select id="itemGst" class="form-select rounded-3">
+                            <option value="0">0% (Exempt)</option>
+                            <option value="5">5%</option>
+                            <option value="12">12%</option>
+                            <option value="18" selected>18%</option>
+                            <option value="28">28%</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" id="btnAddItem" class="btn btn-indigo rounded-3 w-100 fw-semibold">
+                            <i class="bi bi-plus-lg me-1"></i> Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- POS Items List -->
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-transparent border-0 px-4 pt-4">
+                <h5 class="fw-bold text-main mb-0">Cart Items</h5>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <div class="table-responsive" style="max-height: 400px;">
+                    <table class="table align-middle" id="posTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="border-0 rounded-start-3">Product Name</th>
+                                <th class="border-0">Rate (₹)</th>
+                                <th class="border-0" style="width: 120px;">Qty</th>
+                                <th class="border-0">GST (%)</th>
+                                <th class="border-0">Tax Amount</th>
+                                <th class="border-0">Total</th>
+                                <th class="border-0 rounded-end-3 text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartItemsList">
+                            <!-- Injected dynamically by JS -->
+                            <tr id="emptyCartRow">
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-cart3 fs-1 mb-2 d-block"></i>
+                                    <span>POS cart is empty. Add products above to start billing.</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Checkout & Customer Panel -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-transparent border-0 px-4 pt-4">
+                <h5 class="fw-bold text-main mb-0">Customer & Invoice Head</h5>
+            </div>
+            <div class="card-body p-4">
+                <form id="checkoutForm" method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3 position-relative">
+                        <label for="customer_name" class="form-label small fw-medium">Customer Name</label>
+                        {{ form.customer_name(class="form-control rounded-3", placeholder="e.g. Walk-in Client", autocomplete="off") }}
+                        <div id="customerSuggestions" class="list-group position-absolute w-100 shadow-sm d-none" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></div>
+                        <span class="text-danger small error-message" id="err-customer_name"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="customer_phone" class="form-label small fw-medium">Phone Number</label>
+                        {{ form.customer_phone(class="form-control rounded-3", placeholder="10-digit mobile", autocomplete="off") }}
+                        <span class="text-danger small error-message" id="err-customer_phone"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="customer_state_code" class="form-label small fw-medium">Customer State Code (GST Jurisdiction)</label>
+                        <select name="customer_state_code" id="customer_state_code" class="form-select rounded-3">
+                            {% for code, name in indian_states %}
+                                <option value="{{ code }}" {% if form.customer_state_code.data == code %}selected{% endif %}>{{ code }} - {{ name }}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="text-danger small error-message" id="err-customer_state_code"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="customer_gstin" class="form-label small fw-medium">Customer GSTIN (Optional)</label>
+                        {{ form.customer_gstin(class="form-control rounded-3", placeholder="15-char GSTIN") }}
+                        <span class="text-danger small error-message" id="err-customer_gstin"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label for="payment_mode" class="form-label small fw-medium">Payment Mode</label>
+                            {{ form.payment_mode(class="form-select rounded-3") }}
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label for="status" class="form-label small fw-medium">Status</label>
+                            {{ form.status(class="form-select rounded-3") }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="amount_paid" class="form-label small fw-medium">Amount Paid (₹)</label>
+                        {{ form.amount_paid(class="form-control rounded-3", placeholder="0.00", min="0") }}
+                        <span class="text-muted small">Leave blank for full payment when status is Paid, or enter partial amount.</span>
+                        <span class="text-danger small error-message" id="err-amount_paid"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="discount" class="form-label small fw-medium">Discount Amount (₹)</label>
+                        {{ form.discount(class="form-control rounded-3", placeholder="0.00", min="0") }}
+                        <span class="text-danger small error-message" id="err-discount"></span>
+                    </div>
+
+                    <!-- Tax and Financial Summary Card -->
+                    <div class="bg-light rounded-3 p-3 my-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted small">Cart Subtotal:</span>
+                            <span class="fw-semibold text-main small" id="summarySubtotal">₹ 0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2" id="cgstRow">
+                            <span class="text-muted small">CGST Split:</span>
+                            <span class="fw-semibold text-main small" id="summaryCGST">₹ 0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2" id="sgstRow">
+                            <span class="text-muted small">SGST Split:</span>
+                            <span class="fw-semibold text-main small" id="summarySGST">₹ 0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 d-none" id="igstRow">
+                            <span class="text-muted small">IGST Split:</span>
+                            <span class="fw-semibold text-main small" id="summaryIGST">₹ 0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 text-danger">
+                            <span class="small">Discount:</span>
+                            <span class="fw-semibold small" id="summaryDiscount">- ₹ 0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="small">Amount Paid:</span>
+                            <span class="fw-semibold text-main small" id="summaryPaid">₹ 0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="small">Amount Due:</span>
+                            <span class="fw-semibold text-danger small" id="summaryDue">₹ 0.00</span>
+                        </div>
+                        <hr class="my-2 border-dashed">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-main">Grand Total:</span>
+                            <span class="fs-4 fw-black text-indigo" id="summaryTotal">₹ 0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Submit checkout -->
+                    <button type="submit" class="btn btn-indigo rounded-3 w-100 py-3 fw-bold d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-shield-check"></i>
+                        <span>Generate & Complete Invoice</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Inject server configurations globally for JS logic
+    const ORG_STATE_CODE = "{{ org_detail.state_code if (org_detail and org_detail.state_code) else '07' }}";
+    const POST_URL = "{{ url_for('billing.api_create_invoice') }}";
+    const REDIRECT_URL = "{{ url_for('billing.list_invoices') }}";
+</script>
+<script src="{{ url_for('billing.static', filename='js/billing.js') }}"></script>
+{% endblock %}

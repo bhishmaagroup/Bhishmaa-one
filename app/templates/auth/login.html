@@ -1,0 +1,618 @@
+{% extends "layouts/auth_base.html" %}
+
+{% block title %}Sign In — Bhishmaa One Enterprise Platform{% endblock %}
+{% block body_class %}bhishmaa-login-body{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .bhishmaa-login-body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #020408;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .bhishmaa-login-body .auth-container { width: 100%; }
+
+  /* ===== LAYOUT ===== */
+  .bl-wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100vw;
+    position: relative;
+  }
+
+  /* ===== LEFT PANEL ===== */
+  .bl-left {
+    flex: 1.15;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 44px 52px;
+    background: #030712;
+  }
+
+  /* Animated mesh background */
+  .bl-mesh {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 15%, rgba(79,70,229,0.18) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 50% at 90% 80%, rgba(124,58,237,0.14) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 60% 40%, rgba(16,185,129,0.06) 0%, transparent 50%),
+      #030712;
+    animation: meshPulse 8s ease-in-out infinite alternate;
+  }
+
+  @keyframes meshPulse {
+    0%   { opacity: 1; transform: scale(1); }
+    100% { opacity: 0.85; transform: scale(1.03); }
+  }
+
+  /* Glow orbs */
+  .bl-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    animation: orbFloat 10s ease-in-out infinite alternate;
+  }
+  .bl-orb-1 { width: 420px; height: 420px; top: -100px; right: -80px;  background: rgba(79,70,229,0.20); animation-delay: 0s; }
+  .bl-orb-2 { width: 350px; height: 350px; bottom: -80px; left: -60px;  background: rgba(124,58,237,0.16); animation-delay: 3s; }
+  .bl-orb-3 { width: 220px; height: 220px; top: 45%;  left: 55%;  background: rgba(16,185,129,0.10); animation-delay: 6s; }
+
+  @keyframes orbFloat {
+    0%   { transform: translate(0,0) scale(1); }
+    50%  { transform: translate(15px,-20px) scale(1.05); }
+    100% { transform: translate(-10px,15px) scale(0.97); }
+  }
+
+  /* Grid lines overlay */
+  .bl-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(79,70,229,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,70,229,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+  }
+
+  /* ===== LOGO AREA ===== */
+  .bl-logo-area { position: relative; z-index: 10; display: flex; align-items: center; gap: 14px; }
+  .bl-logo-img  { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.12); box-shadow: 0 0 24px rgba(79,70,229,0.35); }
+  .bl-logo-text { display: flex; flex-direction: column; }
+  .bl-logo-title { font-size: 18px; font-weight: 800; color: #f8fafc; letter-spacing: -0.4px; line-height: 1.1; }
+  .bl-logo-sub   { font-size: 11px; color: #6366f1; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+
+  /* ===== HERO TEXT ===== */
+  .bl-hero { position: relative; z-index: 10; flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 48px 0 32px; }
+
+  .bl-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(79,70,229,0.15); border: 1px solid rgba(99,102,241,0.3);
+    color: #a5b4fc; font-size: 11px; font-weight: 600; letter-spacing: 0.8px;
+    text-transform: uppercase; padding: 5px 14px; border-radius: 100px;
+    margin-bottom: 24px; width: fit-content;
+    animation: fadeSlideUp 0.6s ease both;
+  }
+  .bl-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #6366f1; animation: blink 2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .bl-headline {
+    font-size: clamp(30px, 3.5vw, 46px);
+    font-weight: 900; color: #f8fafc;
+    line-height: 1.12; letter-spacing: -1.5px;
+    margin-bottom: 20px;
+    animation: fadeSlideUp 0.7s 0.1s ease both;
+  }
+  .bl-headline .grad {
+    background: linear-gradient(135deg, #818cf8 0%, #6366f1 40%, #a78bfa 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .bl-subline {
+    font-size: 15px; color: #94a3b8; line-height: 1.7; max-width: 440px;
+    margin-bottom: 36px;
+    animation: fadeSlideUp 0.7s 0.2s ease both;
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== MODULE CHIPS ===== */
+  .bl-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; animation: fadeSlideUp 0.7s 0.3s ease both; }
+  .bl-chip {
+    padding: 5px 14px; border-radius: 100px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    color: #cbd5e1; font-size: 12px; font-weight: 500;
+    transition: all 0.25s ease; cursor: default;
+  }
+  .bl-chip:hover { background: rgba(99,102,241,0.18); border-color: rgba(99,102,241,0.5); color: #a5b4fc; }
+
+  /* ===== FLOATING METRIC CARDS ===== */
+  .bl-widgets { position: relative; z-index: 10; animation: fadeSlideUp 0.7s 0.4s ease both; }
+
+  .bl-widget-row { display: flex; gap: 12px; margin-bottom: 12px; }
+
+  .bl-widget {
+    flex: 1; padding: 14px 18px;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    display: flex; align-items: center; gap: 12px;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    animation: floatCard 6s ease-in-out infinite;
+  }
+  .bl-widget:nth-child(2) { animation-delay: 1s; }
+  .bl-widget:nth-child(3) { animation-delay: 2s; }
+  .bl-widget:hover { transform: translateY(-2px); border-color: rgba(99,102,241,0.3); }
+
+  @keyframes floatCard {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-4px); }
+  }
+
+  .bl-widget-icon {
+    width: 34px; height: 34px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .icon-green  { background: rgba(16,185,129,0.15); color: #10b981; }
+  .icon-blue   { background: rgba(99,102,241,0.15); color: #818cf8; }
+  .icon-amber  { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .icon-red    { background: rgba(239,68,68,0.15);  color: #f87171; }
+  .icon-purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
+  .icon-cyan   { background: rgba(6,182,212,0.15);  color: #22d3ee; }
+
+  .bl-widget-info { flex: 1; min-width: 0; }
+  .bl-widget-val  { font-size: 15px; font-weight: 700; color: #f1f5f9; letter-spacing: -0.3px; line-height: 1.1; }
+  .bl-widget-lbl  { font-size: 11px; color: #64748b; font-weight: 500; margin-top: 2px; }
+  .bl-widget-trend{ font-size: 10px; font-weight: 600; }
+  .trend-up   { color: #10b981; }
+  .trend-warn { color: #f59e0b; }
+
+  /* ===== TRUST STRIP ===== */
+  .bl-trust {
+    position: relative; z-index: 10;
+    display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center;
+    padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06);
+    animation: fadeSlideUp 0.7s 0.5s ease both;
+  }
+  .bl-trust-item { display: flex; align-items: center; gap: 6px; color: #64748b; font-size: 11px; font-weight: 500; }
+  .bl-trust-dot  { width: 5px; height: 5px; border-radius: 50%; background: #10b981; }
+
+  /* ===== BOTTOM CREDITS ===== */
+  .bl-footer {
+    position: relative; z-index: 10;
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.05);
+    margin-top: 16px;
+    color: #475569; font-size: 11px;
+  }
+  .bl-footer a { color: #6366f1; text-decoration: none; transition: color 0.2s; }
+  .bl-footer a:hover { color: #a5b4fc; }
+  .bl-footer-dev strong { color: #818cf8; }
+
+  /* ===== RIGHT PANEL ===== */
+  .bl-right {
+    flex: 0.85;
+    display: flex; align-items: center; justify-content: center;
+    padding: 40px 48px;
+    background: rgba(255,255,255,0.016);
+    border-left: 1px solid rgba(255,255,255,0.05);
+    backdrop-filter: blur(20px);
+  }
+
+  .bl-form-wrap { width: 100%; max-width: 420px; }
+
+  /* ===== FORM CARD ===== */
+  .bl-card {
+    background: rgba(255,255,255,0.035);
+    backdrop-filter: blur(24px) saturate(1.4);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 40px 38px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+    animation: cardIn 0.7s 0.2s ease both;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(24px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Mobile logo inside card */
+  .bl-card-logo {
+    display: none; align-items: center; gap: 12px;
+    margin-bottom: 28px; padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .bl-card-logo-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+  .bl-card-logo-text { font-size: 16px; font-weight: 800; color: #f8fafc; letter-spacing: -0.4px; }
+
+  .bl-form-header { margin-bottom: 28px; }
+  .bl-form-eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: #6366f1; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+  }
+  .bl-form-eyebrow::before {
+    content: ''; width: 20px; height: 2px; background: linear-gradient(90deg,#6366f1,transparent); border-radius: 2px;
+  }
+  .bl-form-title { font-size: 26px; font-weight: 800; color: #f8fafc; letter-spacing: -0.8px; margin-bottom: 6px; }
+  .bl-form-sub   { font-size: 13px; color: #64748b; }
+
+  /* Workspace badge */
+  .bl-workspace-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 10px; padding: 8px 14px; margin-bottom: 22px;
+    font-size: 12px; color: #94a3b8;
+  }
+  .bl-ws-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981; flex-shrink: 0; }
+  .bl-ws-label strong { color: #c7d2fe; }
+
+  /* Form fields */
+  .bl-field { margin-bottom: 18px; }
+  .bl-field label { display: block; font-size: 12px; font-weight: 600; color: #94a3b8; margin-bottom: 6px; letter-spacing: 0.2px; }
+
+  .bl-input-wrap { position: relative; }
+  .bl-input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #475569; font-size: 14px; pointer-events: none; z-index: 2; transition: color 0.2s; }
+  .bl-input-eye  { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #475569; font-size: 14px; cursor: pointer; z-index: 2; transition: color 0.2s; background: none; border: none; padding: 0; }
+  .bl-input-eye:hover { color: #6366f1; }
+
+  .bl-input {
+    width: 100%; padding: 12px 14px 12px 40px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; color: #f1f5f9; font-size: 14px; font-weight: 500;
+    font-family: inherit; outline: none;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+  .bl-input::placeholder { color: #334155; }
+  .bl-input:focus {
+    border-color: rgba(99,102,241,0.6);
+    background: rgba(99,102,241,0.06);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12), 0 0 20px rgba(99,102,241,0.08);
+  }
+  .bl-input:focus + .bl-input-icon,
+  .bl-input-wrap:focus-within .bl-input-icon { color: #6366f1; }
+  .bl-input.has-eye { padding-right: 42px; }
+
+  /* Error text */
+  .bl-error { font-size: 11px; color: #f87171; margin-top: 5px; display: block; }
+
+  /* Options row */
+  .bl-options { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+  .bl-remember { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .bl-remember input[type=checkbox] { width: 15px; height: 15px; accent-color: #6366f1; cursor: pointer; }
+  .bl-remember span { font-size: 12px; color: #64748b; }
+  .bl-forgot { font-size: 12px; font-weight: 600; color: #6366f1; text-decoration: none; transition: color 0.2s; }
+  .bl-forgot:hover { color: #818cf8; }
+
+  /* Submit button */
+  .bl-btn {
+    width: 100%; padding: 14px 24px;
+    background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+    color: white; font-size: 14px; font-weight: 700;
+    border: none; border-radius: 12px; cursor: pointer;
+    letter-spacing: 0.3px; font-family: inherit;
+    position: relative; overflow: hidden;
+    box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-bottom: 16px;
+  }
+  .bl-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 60%);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .bl-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(99,102,241,0.55); }
+  .bl-btn:hover::before { opacity: 1; }
+  .bl-btn:active { transform: translateY(0); }
+  .bl-btn-inner { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .bl-btn-spinner { display: none; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Divider */
+  .bl-divider { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .bl-divider::before, .bl-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+  .bl-divider span { font-size: 11px; color: #334155; white-space: nowrap; }
+
+  /* Register link */
+  .bl-register { text-align: center; }
+  .bl-register span { font-size: 13px; color: #475569; }
+  .bl-register a { font-size: 13px; font-weight: 600; color: #6366f1; text-decoration: none; margin-left: 4px; transition: color 0.2s; }
+  .bl-register a:hover { color: #818cf8; }
+
+  /* Trust icons under form */
+  .bl-form-trust { display: flex; justify-content: center; gap: 20px; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .bl-form-trust-item { display: flex; align-items: center; gap: 5px; color: #334155; font-size: 10px; font-weight: 500; }
+  .bl-form-trust-item i { font-size: 11px; color: #475569; }
+
+  /* ===== MOUSE FOLLOW GLOW ===== */
+  .bl-cursor-glow {
+    position: fixed; pointer-events: none; z-index: 0;
+    width: 400px; height: 400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%);
+    transform: translate(-50%,-50%);
+    transition: left 0.15s ease, top 0.15s ease;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1024px) {
+    .bl-left { flex: 1; padding: 36px 36px; }
+    .bl-right { flex: 1; padding: 36px 28px; }
+    .bl-widget-row { flex-direction: column; }
+    .bl-headline { font-size: 28px; }
+  }
+
+  @media (max-width: 768px) {
+    .bl-wrapper { flex-direction: column; }
+    .bl-left { display: none; }
+    .bl-right { width: 100%; padding: 32px 20px; min-height: 100vh; background: #030712; border-left: none; }
+    .bl-card { border-radius: 20px; padding: 32px 28px; }
+    .bl-card-logo { display: flex; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Mouse follow glow effect -->
+<div class="bl-cursor-glow" id="cursorGlow"></div>
+
+<div class="bl-wrapper">
+  <!-- ========== LEFT BRANDING PANEL ========== -->
+  <div class="bl-left">
+    <div class="bl-mesh"></div>
+    <div class="bl-orb bl-orb-1"></div>
+    <div class="bl-orb bl-orb-2"></div>
+    <div class="bl-orb bl-orb-3"></div>
+    <div class="bl-grid"></div>
+
+    <!-- Logo -->
+    <div class="bl-logo-area">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Bhishmaa Group" class="bl-logo-img">
+      <div class="bl-logo-text">
+        <span class="bl-logo-title">Bhishmaa One</span>
+        <span class="bl-logo-sub">by Bhishmaa Group</span>
+      </div>
+    </div>
+
+    <!-- Hero -->
+    <div class="bl-hero">
+      <div class="bl-badge"><span class="bl-badge-dot"></span> Enterprise SaaS Platform</div>
+      <h1 class="bl-headline">The Operating System<br>For <span class="grad">Modern Business.</span></h1>
+      <p class="bl-subline">Bhishmaa One unifies your entire business — billing, inventory, CRM, payroll, analytics, and operations — into one secure, multi-tenant cloud workspace.</p>
+
+      <!-- Module chips -->
+      <div class="bl-chips">
+        <span class="bl-chip">⚡ POS Billing</span>
+        <span class="bl-chip">📦 Inventory</span>
+        <span class="bl-chip">👥 CRM</span>
+        <span class="bl-chip">💼 HRMS</span>
+        <span class="bl-chip">📊 Analytics</span>
+        <span class="bl-chip">💰 Payroll</span>
+        <span class="bl-chip">🏢 Multi-Branch</span>
+        <span class="bl-chip">🧾 GST Reports</span>
+        <span class="bl-chip">📈 P&L Ledger</span>
+      </div>
+
+      <!-- Floating metric widgets -->
+      <div class="bl-widgets">
+        <div class="bl-widget-row">
+          <div class="bl-widget">
+            <div class="bl-widget-icon icon-green"><i class="bi bi-currency-rupee"></i></div>
+            <div class="bl-widget-info">
+              <div class="bl-widget-val">₹2,41,680</div>
+              <div class="bl-widget-lbl">Today's Revenue</div>
+            </div>
+            <div class="bl-widget-trend trend-up">↑ 12.4%</div>
+          </div>
+          <div class="bl-widget">
+            <div class="bl-widget-icon icon-blue"><i class="bi bi-receipt-cutoff"></i></div>
+            <div class="bl-widget-info">
+              <div class="bl-widget-val">127</div>
+              <div class="bl-widget-lbl">Active Orders</div>
+            </div>
+            <div class="bl-widget-trend trend-up">↑ 8</div>
+          </div>
+        </div>
+        <div class="bl-widget-row">
+          <div class="bl-widget">
+            <div class="bl-widget-icon icon-purple"><i class="bi bi-people"></i></div>
+            <div class="bl-widget-info">
+              <div class="bl-widget-val">42 Online</div>
+              <div class="bl-widget-lbl">Employees Active</div>
+            </div>
+            <div class="bl-widget-trend trend-up">Live</div>
+          </div>
+          <div class="bl-widget">
+            <div class="bl-widget-icon icon-amber"><i class="bi bi-exclamation-triangle"></i></div>
+            <div class="bl-widget-info">
+              <div class="bl-widget-val">3 Items</div>
+              <div class="bl-widget-lbl">Low Stock Alerts</div>
+            </div>
+            <div class="bl-widget-trend trend-warn">Action</div>
+          </div>
+        </div>
+        <div class="bl-widget-row">
+          <div class="bl-widget">
+            <div class="bl-widget-icon icon-cyan"><i class="bi bi-activity"></i></div>
+            <div class="bl-widget-info">
+              <div class="bl-widget-val">99.9% Uptime</div>
+              <div class="bl-widget-lbl">Platform Health</div>
+            </div>
+            <div class="bl-widget-trend trend-up">Stable</div>
+          </div>
+          <div class="bl-widget">
+            <div class="bl-widget-icon icon-green"><i class="bi bi-graph-up-arrow"></i></div>
+            <div class="bl-widget-info">
+              <div class="bl-widget-val">₹18.2L</div>
+              <div class="bl-widget-lbl">Monthly GMV</div>
+            </div>
+            <div class="bl-widget-trend trend-up">↑ 23%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trust strip -->
+    <div class="bl-trust">
+      <div class="bl-trust-item"><div class="bl-trust-dot"></div> Enterprise Security</div>
+      <div class="bl-trust-item"><div class="bl-trust-dot"></div> Cloud Backup</div>
+      <div class="bl-trust-item"><div class="bl-trust-dot"></div> 99.9% Uptime</div>
+      <div class="bl-trust-item"><div class="bl-trust-dot"></div> Multi-Tenant Architecture</div>
+    </div>
+
+    <!-- Footer credits -->
+    <div class="bl-footer">
+      <span>&copy; 2026 <a href="https://bhishmaagroup.in" target="_blank">bhishmaagroup.in</a> · All rights reserved.</span>
+      <span class="bl-footer-dev">Crafted by <strong>enoughsudhanshu</strong></span>
+    </div>
+  </div>
+
+  <!-- ========== RIGHT LOGIN PANEL ========== -->
+  <div class="bl-right">
+    <div class="bl-form-wrap">
+      <div class="bl-card">
+        <!-- Mobile logo (shown only on small screens) -->
+        <div class="bl-card-logo">
+          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Bhishmaa" class="bl-card-logo-img">
+          <span class="bl-card-logo-text">Bhishmaa One</span>
+        </div>
+
+        <!-- Header -->
+        <div class="bl-form-header">
+          <div class="bl-form-eyebrow">Workspace Access</div>
+          <div class="bl-form-title">Welcome back</div>
+          <div class="bl-form-sub">Sign in to your business workspace</div>
+        </div>
+
+        <!-- Workspace indicator -->
+        <div class="bl-workspace-badge">
+          <div class="bl-ws-dot"></div>
+          <div class="bl-ws-label">Workspace: <strong>bhishmaagroup.in</strong></div>
+        </div>
+
+        <form method="POST" action="" id="loginForm">
+          {{ form.hidden_tag() }}
+
+          <!-- Username -->
+          <div class="bl-field">
+            <label>Username or Employee ID</label>
+            <div class="bl-input-wrap">
+              <i class="bi bi-person bl-input-icon"></i>
+              {{ form.username(class="bl-input", placeholder="Enter username or ID") }}
+            </div>
+            {% for error in form.username.errors %}
+              <span class="bl-error"><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</span>
+            {% endfor %}
+          </div>
+
+          <!-- Password -->
+          <div class="bl-field">
+            <label>Password</label>
+            <div class="bl-input-wrap">
+              <i class="bi bi-lock bl-input-icon"></i>
+              {{ form.password(class="bl-input has-eye", placeholder="Enter your password", id="pwdInput") }}
+              <button type="button" class="bl-input-eye" onclick="togglePwd()" id="pwdToggle" aria-label="Toggle password visibility">
+                <i class="bi bi-eye" id="pwdIcon"></i>
+              </button>
+            </div>
+            {% for error in form.password.errors %}
+              <span class="bl-error"><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</span>
+            {% endfor %}
+          </div>
+
+          <!-- Options -->
+          <div class="bl-options">
+            <label class="bl-remember">
+              {{ form.remember(type="checkbox") }}
+              <span>Keep me signed in</span>
+            </label>
+            <a href="#" class="bl-forgot">Forgot password?</a>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="bl-btn" id="submitBtn">
+            <div class="bl-btn-inner">
+              <div class="bl-btn-spinner" id="btnSpinner"></div>
+              <span id="btnText">Sign In to Workspace</span>
+              <i class="bi bi-arrow-right" id="btnArrow"></i>
+            </div>
+          </button>
+        </form>
+
+        <div class="bl-divider"><span>Don't have access yet?</span></div>
+        <div class="bl-register">
+          <span>New organisation?</span>
+          <a href="{{ url_for('auth.register') }}">Register your business →</a>
+        </div>
+
+        <!-- Trust under form -->
+        <div class="bl-form-trust">
+          <div class="bl-form-trust-item"><i class="bi bi-shield-lock"></i> SSL Secured</div>
+          <div class="bl-form-trust-item"><i class="bi bi-cloud-check"></i> Data Encrypted</div>
+          <div class="bl-form-trust-item"><i class="bi bi-building"></i> GDPR Ready</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Password toggle
+  function togglePwd() {
+    const input = document.getElementById('pwdInput');
+    const icon  = document.getElementById('pwdIcon');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'bi bi-eye-slash';
+    } else {
+      input.type = 'password';
+      icon.className = 'bi bi-eye';
+    }
+  }
+
+  // Submit loading state
+  document.getElementById('loginForm').addEventListener('submit', function() {
+    const btn     = document.getElementById('submitBtn');
+    const spinner = document.getElementById('btnSpinner');
+    const text    = document.getElementById('btnText');
+    const arrow   = document.getElementById('btnArrow');
+    spinner.style.display = 'block';
+    text.textContent = 'Signing in…';
+    arrow.style.display = 'none';
+    btn.disabled = true;
+    setTimeout(() => { btn.disabled = false; spinner.style.display = 'none'; text.textContent = 'Sign In to Workspace'; arrow.style.display = 'inline'; }, 6000);
+  });
+
+  // Mouse-follow glow (desktop only)
+  const glow = document.getElementById('cursorGlow');
+  if (window.innerWidth > 768) {
+    document.addEventListener('mousemove', (e) => {
+      glow.style.left = e.clientX + 'px';
+      glow.style.top  = e.clientY + 'px';
+    });
+  } else {
+    glow.style.display = 'none';
+  }
+
+  // Input focus icon colour (handled by CSS :focus-within)
+  // Stagger widget float animations
+  document.querySelectorAll('.bl-widget').forEach((w, i) => {
+    w.style.animationDelay = (i * 0.6) + 's';
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+/* Roles module specific stylesheet */
+
+.bg-indigo-light {
+    background-color: var(--color-primary-light) !important;
+    color: var(--color-primary) !important;
+}
+
+.text-indigo {
+    color: var(--color-primary) !important;
+}
+
+.bg-secondary-light {
+    background-color: rgba(108, 117, 125, 0.1) !important;
+    color: #6c757d !important;
+}
+
+.bg-warning-light {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+    color: #ffc107 !important;
+}
+
+.bg-success-light {
+    background-color: rgba(25, 135, 84, 0.1) !important;
+    color: #198754 !important;
+}
+
+.bg-danger-light {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+    color: #dc3545 !important;
+}
+
+.bg-light-hover:hover {
+    background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+[data-theme="dark"] .bg-light-hover:hover {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+.transition-all {
+    transition: all 0.2s ease-in-out;
+}

@@ -1,0 +1,36 @@
+{% extends "layouts/auth_base.html" %}
+
+{% block title %}Verify Code - Bhishmaa One{% endblock %}
+
+{% block content %}
+<div class="auth-card shadow-lg border-0 p-4 p-md-5 rounded-4">
+    <div class="text-center mb-4">
+        <div class="brand-logo-icon d-inline-flex mb-3">
+            <i class="bi bi-activity text-white fs-3"></i>
+        </div>
+        <h3 class="fw-bold tracking-tight">Verify Passcode</h3>
+        <p class="text-muted small">Enter the 6-digit passcode sent to <strong>{{ email }}</strong></p>
+    </div>
+
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        
+        <div class="mb-4">
+            <label for="otp_code" class="form-label fw-medium small">6-Digit Passcode</label>
+            {{ form.otp_code(class="form-control text-center rounded-3 tracking-widest fw-bold fs-4", placeholder="000000", maxlength="6") }}
+            {% for error in form.otp_code.errors %}
+                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+            {% endfor %}
+        </div>
+        
+        <div class="d-grid mb-3">
+            {{ form.submit(class="btn btn-indigo rounded-3 py-2 fw-semibold") }}
+        </div>
+    </form>
+
+    <div class="text-center mt-4 border-top pt-3">
+        <span class="text-muted small">Didn't receive it?</span>
+        <a href="{{ url_for('auth.otp_login') }}" class="small fw-semibold text-indigo ms-1">Request new passcode</a>
+    </div>
+</div>
+{% endblock %}

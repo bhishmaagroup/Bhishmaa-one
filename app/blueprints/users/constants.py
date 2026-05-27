@@ -1,0 +1,20 @@
+# Users & Staff Designation Constants
+
+DESIGNATION_MANAGER = 'Manager'
+DESIGNATION_CASHIER = 'Cashier'
+DESIGNATION_ACCOUNTANT = 'Accountant'
+DESIGNATION_RECEPTIONIST = 'Receptionist'
+DESIGNATION_TEACHER = 'Teacher'
+DESIGNATION_STAFF = 'Staff'
+
+DESIGNATIONS = [
+    DESIGNATION_MANAGER,
+    DESIGNATION_CASHIER,
+    DESIGNATION_ACCOUNTANT,
+    DESIGNATION_RECEPTIONIST,
+    DESIGNATION_TEACHER,
+    DESIGNATION_STAFF
+]
+
+# Department Constants
+DEPARTMENTS = ['Admin', 'Sales', 'Inventory', 'Finance', 'Operations', 'Education']

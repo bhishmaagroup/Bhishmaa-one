@@ -1,0 +1,184 @@
+<aside class="app-sidebar" id="appSidebar">
+    <!-- Brand Info -->
+    <div class="sidebar-brand d-flex align-items-center gap-2 px-4">
+        <div class="brand-logo-icon">
+            <i class="bi bi-activity text-white"></i>
+        </div>
+        <span class="brand-text text-white fw-bold">Bhishmaa One</span>
+        <button class="btn text-white ms-auto d-lg-none border-0 p-0" onclick="toggleSidebar()" type="button" aria-label="Close sidebar">
+            <i class="bi bi-x-lg fs-5"></i>
+        </button>
+    </div>
+
+    <!-- Navigation Options -->
+    <nav class="sidebar-navigation py-3 px-3">
+        <ul class="nav flex-column gap-1">
+            <!-- Dashboard -->
+            {% if current_user.has_permission('can_view_dashboard') %}
+            <li class="nav-item">
+                <a href="{{ url_for('dashboard.index') }}" 
+                   class="nav-link {% if request.blueprint == 'dashboard' %}active{% endif %}"
+                   title="View dashboard overview">
+                    <i class="bi bi-grid-1x2 me-2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            <!-- Operations Section -->
+            {% if current_user.has_permission('can_manage_billing') or current_user.has_permission('can_manage_inventory') or current_user.has_permission('can_manage_crm') %}
+            <li class="sidebar-section-title px-3 pt-3 pb-2 text-uppercase fw-bold text-muted small">Operations</li>
+            
+            {% if current_user.has_permission('can_manage_billing') %}
+            <li class="nav-item">
+                <a href="{{ url_for('pos.billing') }}" 
+                   class="nav-link {% if request.blueprint == 'pos' %}active{% endif %}"
+                   title="Launch POS billing terminal">
+                    <i class="bi bi-receipt me-2"></i>
+                    <span>POS Billing</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('billing.list_invoices') }}" 
+                   class="nav-link {% if request.blueprint == 'billing' and request.endpoint == 'billing.list_invoices' %}active{% endif %}"
+                   title="View and manage invoice records">
+                    <i class="bi bi-file-text me-2"></i>
+                    <span>Invoice List</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            {% if current_user.has_permission('can_manage_inventory') %}
+            <li class="nav-item">
+                <a href="{{ url_for('inventory.list_products') }}" 
+                   class="nav-link {% if request.blueprint == 'inventory' %}active{% endif %}"
+                   title="Manage products and stock">
+                    <i class="bi bi-box-seam me-2"></i>
+                    <span>Inventory</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            {% if current_user.has_permission('can_manage_crm') %}
+            <li class="nav-item">
+                <a href="{{ url_for('crm.list_customers') }}" 
+                   class="nav-link {% if request.blueprint == 'crm' and 'customer' in request.endpoint %}active{% endif %}"
+                   title="Manage customer registry">
+                    <i class="bi bi-people me-2"></i>
+                    <span>Customers</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('crm.list_suppliers') }}" 
+                   class="nav-link {% if request.blueprint == 'crm' and 'supplier' in request.endpoint %}active{% endif %}"
+                   title="Manage suppliers database">
+                    <i class="bi bi-truck me-2"></i>
+                    <span>Suppliers</span>
+                </a>
+            </li>
+            {% endif %}
+            {% endif %}
+            
+            <!-- Finance Section -->
+            {% if current_user.has_permission('can_manage_expenses') or current_user.has_permission('can_manage_reports') %}
+            <li class="sidebar-section-title px-3 pt-3 pb-2 text-uppercase fw-bold text-muted small">Finance</li>
+            
+            {% if current_user.has_permission('can_manage_expenses') %}
+            <li class="nav-item">
+                <a href="{{ url_for('expenses.list_expenses') }}" 
+                   class="nav-link {% if request.blueprint == 'expenses' %}active{% endif %}"
+                   title="Track cash outflows and supplier expenses">
+                    <i class="bi bi-cash-stack me-2"></i>
+                    <span>Expenses</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            {% if current_user.has_permission('can_manage_reports') %}
+            <li class="nav-item">
+                <a href="{{ url_for('reports.dashboard') }}" 
+                   class="nav-link {% if request.blueprint == 'reports' and request.endpoint == 'reports.dashboard' %}active{% endif %}"
+                   title="View business financial analytics">
+                    <i class="bi bi-bar-chart me-2"></i>
+                    <span>Reports</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('reports.profit_loss_report') }}" 
+                   class="nav-link {% if request.blueprint == 'reports' and request.endpoint == 'reports.profit_loss_report' %}active{% endif %}"
+                   title="View Profit & Loss statement sheet">
+                    <i class="bi bi-currency-rupee me-2"></i>
+                    <span>Profit & Loss</span>
+                </a>
+            </li>
+            {% endif %}
+            {% endif %}
+            
+            <!-- HR Section -->
+            {% if current_user.has_permission('can_manage_hrm') %}
+            <li class="sidebar-section-title px-3 pt-3 pb-2 text-uppercase fw-bold text-muted small">HRM</li>
+            <li class="nav-item">
+                <a href="{{ url_for('hrm.list_attendance') }}" 
+                   class="nav-link {% if request.endpoint == 'hrm.list_attendance' %}active{% endif %}"
+                   title="Manage staff attendance logs">
+                    <i class="bi bi-calendar-check me-2"></i>
+                    <span>Attendance</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('hrm.list_payroll') }}" 
+                   class="nav-link {% if request.endpoint == 'hrm.list_payroll' or 'payroll' in request.endpoint %}active{% endif %}"
+                   title="Generate and view salary payslips">
+                    <i class="bi bi-wallet2 me-2"></i>
+                    <span>Payroll</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            <!-- Administration Section -->
+            <li class="sidebar-section-title px-3 pt-3 pb-2 text-uppercase fw-bold text-muted small">Administration</li>
+            
+            {% if current_user.has_permission('can_manage_staff') %}
+            <li class="nav-item">
+                <a href="{{ url_for('users.list_users') }}" 
+                   class="nav-link {% if request.blueprint == 'users' %}active{% endif %}"
+                   title="Manage staff member accounts">
+                    <i class="bi bi-person-badge me-2"></i>
+                    <span>Staff & Users</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            {% if current_user.has_permission('can_manage_roles') %}
+            <li class="nav-item">
+                <a href="{{ url_for('roles.list_roles') }}" 
+                   class="nav-link {% if request.blueprint == 'roles' %}active{% endif %}"
+                   title="Configure roles and permission security matrix">
+                    <i class="bi bi-shield-lock me-2"></i>
+                    <span>Roles</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            <li class="nav-item">
+                <a href="{{ url_for('notifications.list_notifications') }}" 
+                   class="nav-link {% if request.blueprint == 'notifications' %}active{% endif %}"
+                   title="View system alerts and inbox">
+                    <i class="bi bi-bell me-2"></i>
+                    <span>Notifications</span>
+                </a>
+            </li>
+            
+            {% if current_user.has_permission('can_manage_organization') %}
+            <li class="nav-item">
+                <a href="{{ url_for('organizations.profile') }}" 
+                   class="nav-link {% if request.blueprint == 'organizations' and request.endpoint == 'organizations.profile' %}active{% endif %}"
+                   title="Configure tenant organization settings">
+                    <i class="bi bi-gear me-2"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</aside>

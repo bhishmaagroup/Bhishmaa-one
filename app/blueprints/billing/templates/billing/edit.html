@@ -1,0 +1,252 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Edit Invoice - {{ invoice.invoice_number }}{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('billing.list_invoices') }}">Billing</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('billing.details', invoice_id=invoice.id) }}">{{ invoice.invoice_number }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Edit</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main"><i class="bi bi-pencil-square me-2 text-indigo"></i>Edit Invoice Details</h2>
+        <p class="text-muted small mb-0">Invoice: <strong class="font-monospace text-indigo">{{ invoice.invoice_number }}</strong></p>
+    </div>
+    <div>
+        <a href="{{ url_for('billing.details', invoice_id=invoice.id) }}" class="btn btn-light border rounded-3 px-3 fw-semibold">
+            <i class="bi bi-x-circle me-1"></i> Cancel
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Edit Form Column -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-transparent border-0 px-4 pt-4 pb-0">
+                <h5 class="fw-bold text-main mb-0">Customer & Payment Registry</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="" id="editInvoiceForm">
+                    {{ form.hidden_tag() }}
+                    
+                    <h6 class="text-uppercase fw-bold text-muted small tracking-wider mb-3">Customer Information</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-medium">Customer Name</label>
+                            {{ form.customer_name(class="form-control rounded-3", placeholder="e.g. Walk-in Client") }}
+                            {% for error in form.customer_name.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-medium">Phone Number</label>
+                            {{ form.customer_phone(class="form-control rounded-3", placeholder="10-digit number") }}
+                            {% for error in form.customer_phone.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-medium">GSTIN (Tax ID)</label>
+                            {{ form.customer_gstin(class="form-control rounded-3", placeholder="15-character GSTIN") }}
+                            {% for error in form.customer_gstin.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-medium">State Code</label>
+                            {{ form.customer_state_code(class="form-control rounded-3", placeholder="e.g. 07") }}
+                            {% for error in form.customer_state_code.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h6 class="text-uppercase fw-bold text-muted small tracking-wider mb-3">Billing & Payment Adjustments</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-medium">Payment Mode</label>
+                            {{ form.payment_mode(class="form-select rounded-3") }}
+                            {% for error in form.payment_mode.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-medium">Payment Status</label>
+                            {{ form.status(class="form-select rounded-3", id="paymentStatusSelect") }}
+                            {% for error in form.status.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-medium">Amount Paid (₹)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted fw-bold">₹</span>
+                                {{ form.amount_paid(class="form-control rounded-end-3", id="amountPaidInput", type="number", step="0.01") }}
+                            </div>
+                            <div class="form-text text-muted small mt-1">
+                                Enter the total accumulated amount paid so far. Max: <strong>₹ {{ "{:,.2f}".format(invoice.total_amount) }}</strong>
+                            </div>
+                            {% for error in form.amount_paid.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-2">
+                        <button type="submit" class="btn btn-indigo rounded-3 w-100 py-2.5 fw-bold">
+                            <i class="bi bi-check-circle me-1"></i> Commit Modifications
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Details Preview Column -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 bg-light">
+            <div class="card-header bg-transparent border-0 px-4 pt-4 pb-0">
+                <h5 class="fw-bold text-main mb-0"><i class="bi bi-receipt me-2 text-indigo"></i>Invoice Details Summary</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="mb-4">
+                    <span class="text-muted small d-block">Invoice Number</span>
+                    <strong class="font-monospace text-main fs-5">{{ invoice.invoice_number }}</strong>
+                </div>
+
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-borderless align-middle small">
+                        <thead>
+                            <tr class="border-bottom text-muted">
+                                <th>Item</th>
+                                <th class="text-end">Qty & Rate</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in invoice.items %}
+                            <tr class="border-bottom-subtle">
+                                <td class="fw-medium text-main">{{ item.product_name }}</td>
+                                <td class="text-end text-muted">{{ item.quantity }} &times; ₹{{ "{:,.2f}".format(item.unit_price) }}</td>
+                                <td class="text-end fw-bold text-main">₹{{ "{:,.2f}".format(item.total_amount) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bg-white rounded-3 p-3 border">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Subtotal:</span>
+                        <span class="fw-semibold text-main small">₹ {{ "{:,.2f}".format(invoice.sub_total) }}</span>
+                    </div>
+                    {% if invoice.cgst > 0 or invoice.sgst > 0 %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">CGST:</span>
+                        <span class="fw-semibold text-main small">₹ {{ "{:,.2f}".format(invoice.cgst) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">SGST:</span>
+                        <span class="fw-semibold text-main small">₹ {{ "{:,.2f}".format(invoice.sgst) }}</span>
+                    </div>
+                    {% endif %}
+                    {% if invoice.igst > 0 %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">IGST:</span>
+                        <span class="fw-semibold text-main small">₹ {{ "{:,.2f}".format(invoice.igst) }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="d-flex justify-content-between mb-2 text-danger">
+                        <span class="small">Discount:</span>
+                        <span class="fw-semibold small">- ₹ {{ "{:,.2f}".format(invoice.discount) }}</span>
+                    </div>
+                    <hr class="my-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-main small">Total Invoice Amount:</span>
+                        <span class="fw-black text-indigo">₹ {{ "{:,.2f}".format(invoice.total_amount) }}</span>
+                    </div>
+                </div>
+
+                <div class="bg-indigo-light rounded-3 p-3 mt-3 border border-indigo-subtle text-indigo">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="small d-block fw-semibold">Current Balance Status</span>
+                            <span class="small text-muted" id="statusMessage">
+                                {% if invoice.status == 'Paid' %}
+                                Fully paid invoice.
+                                {% elif invoice.status == 'Partial' %}
+                                Part paid, ₹{{ "{:,.2f}".format(invoice.get_pending_amount()) }} pending.
+                                {% else %}
+                                Fully unpaid, credit sales ledger entry.
+                                {% endif %}
+                            </span>
+                        </div>
+                        <span class="badge {% if invoice.status == 'Paid' %}bg-success{% elif invoice.status == 'Partial' %}bg-warning{% else %}bg-danger{% endif %} text-white rounded-pill px-3 py-1.5 small">
+                            {{ invoice.status }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const totalAmount = parseFloat("{{ invoice.total_amount }}") || 0;
+        const statusSelect = document.getElementById('paymentStatusSelect');
+        const amountInput = document.getElementById('amountPaidInput');
+        const statusMessage = document.getElementById('statusMessage');
+
+        function updateFieldsFromStatus() {
+            const status = statusSelect.value;
+            if (status === 'Paid') {
+                amountInput.value = totalAmount.toFixed(2);
+                amountInput.readOnly = true;
+                statusMessage.textContent = 'Invoice will be updated as fully paid (₹' + totalAmount.toLocaleString('en-IN') + ').';
+            } else if (status === 'Unpaid') {
+                amountInput.value = (0.0).toFixed(2);
+                amountInput.readOnly = true;
+                statusMessage.textContent = 'Invoice will be updated as completely unpaid (Credit Sale).';
+            } else {
+                // Partial
+                amountInput.readOnly = false;
+                const val = parseFloat(amountInput.value) || 0;
+                if (val >= totalAmount) {
+                    amountInput.value = (totalAmount / 2).toFixed(2);
+                }
+                const pending = totalAmount - (parseFloat(amountInput.value) || 0);
+                statusMessage.textContent = 'Invoice will have ₹' + pending.toLocaleString('en-IN') + ' remaining balance.';
+            }
+        }
+
+        statusSelect.addEventListener('change', updateFieldsFromStatus);
+
+        amountInput.addEventListener('input', () => {
+            const val = parseFloat(amountInput.value) || 0;
+            if (statusSelect.value === 'Partial') {
+                if (val <= 0) {
+                    statusMessage.textContent = 'Invalid amount. Partial payments must be greater than zero.';
+                } else if (val >= totalAmount) {
+                    statusMessage.textContent = 'Amount exceeds total. Switch status to "Paid" for full settlement.';
+                } else {
+                    const pending = totalAmount - val;
+                    statusMessage.textContent = 'Invoice will have ₹' + pending.toFixed(2) + ' remaining balance.';
+                }
+            }
+        });
+
+        // Initialize state on page load
+        if (statusSelect.value === 'Paid' || statusSelect.value === 'Unpaid') {
+            amountInput.readOnly = true;
+        }
+    });
+</script>
+{% endblock %}

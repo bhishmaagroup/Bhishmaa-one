@@ -1,0 +1,153 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Edit Product - Bhishmaa One{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('inventory.list_products') }}">Inventory</a></li>
+<li class="breadcrumb-item active" aria-current="page">Edit Product</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-lg-10">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-transparent border-0 px-4 pt-4">
+                <h5 class="fw-bold mb-1 text-main">Edit Catalog Product</h5>
+                <p class="text-muted small mb-0">Modify details, adjust tax settings and reorder triggers</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="section-divider-title mb-3">Product Profile Details</div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="name" class="form-label fw-medium small">Product / Service Name</label>
+                            {{ form.name(class="form-control rounded-3", placeholder="e.g. Paracetamol 500mg, Consultation Fee") }}
+                            {% for error in form.name.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="sku" class="form-label fw-medium small">SKU Code (Alphanumeric/dashes)</label>
+                            {{ form.sku(class="form-control rounded-3", placeholder="Auto-generated if left blank") }}
+                            {% for error in form.sku.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="barcode" class="form-label fw-medium small">Barcode Value</label>
+                            {{ form.barcode(class="form-control rounded-3", placeholder="Scan or type barcode") }}
+                            {% for error in form.barcode.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-medium small">Description</label>
+                        {{ form.description(class="form-control rounded-3", rows="2", placeholder="Provide features, packaging format details...") }}
+                        {% for error in form.description.errors %}
+                            <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="category_id" class="form-label fw-medium small">Category</label>
+                            {{ form.category_id(class="form-select rounded-3") }}
+                            {% for error in form.category_id.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="brand_id" class="form-label fw-medium small">Brand</label>
+                            {{ form.brand_id(class="form-select rounded-3") }}
+                            {% for error in form.brand_id.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="unit_id" class="form-label fw-medium small">Measurement Unit</label>
+                            {{ form.unit_id(class="form-select rounded-3") }}
+                            {% for error in form.unit_id.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="section-divider-title my-4">Financials & Pricing</div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="purchase_price" class="form-label fw-medium small">Purchase Price (₹)</label>
+                            {{ form.purchase_price(class="form-control rounded-3", placeholder="0.00") }}
+                            {% for error in form.purchase_price.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="selling_price" class="form-label fw-medium small">Selling Price (₹)</label>
+                            {{ form.selling_price(class="form-control rounded-3", placeholder="0.00") }}
+                            {% for error in form.selling_price.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="gst_rate" class="form-label fw-medium small">GST Taxation (%)</label>
+                            {{ form.gst_rate(class="form-select rounded-3") }}
+                            {% for error in form.gst_rate.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="section-divider-title my-4">Stock Settings</div>
+                    
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="current_stock" class="form-label fw-medium small">Current Stock Level</label>
+                            {{ form.current_stock(class="form-control rounded-3 bg-light text-muted", readonly=True) }}
+                            <span class="text-muted small mt-1 d-block"><i class="bi bi-info-circle me-1"></i>Use stock adjustment views to increment/decrement.</span>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="min_stock_alert" class="form-label fw-medium small">Min Stock Warning Level</label>
+                            {{ form.min_stock_alert(class="form-control rounded-3", placeholder="5.00") }}
+                            {% for error in form.min_stock_alert.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="max_stock_level" class="form-label fw-medium small">Max Stock Level</label>
+                            {{ form.max_stock_level(class="form-control rounded-3", placeholder="100.00") }}
+                            {% for error in form.max_stock_level.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="reorder_quantity" class="form-label fw-medium small">Reorder Quantity</label>
+                            {{ form.reorder_quantity(class="form-control rounded-3", placeholder="20.00") }}
+                            {% for error in form.reorder_quantity.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-check form-switch mt-3">
+                        {{ form.is_active(class="form-check-input", id="is_active") }}
+                        <label class="form-check-label small" for="is_active">Active product for sale and inventory</label>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{{ url_for('inventory.list_products') }}" class="btn btn-light rounded-3 px-4 border fw-semibold">Cancel</a>
+                        {{ form.submit(class="btn btn-indigo rounded-3 px-4 fw-semibold") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "layouts/auth_base.html" %}
+
+{% block title %}Register Business - Bhishmaa One{% endblock %}
+
+{% block content %}
+<div class="auth-card auth-card-wide shadow-lg border-0 p-4 p-md-5 rounded-4 my-4">
+    <div class="text-center mb-4">
+        <div class="brand-logo-icon d-inline-flex mb-3">
+            <i class="bi bi-activity text-white fs-3"></i>
+        </div>
+        <h3 class="fw-bold tracking-tight">Register Business</h3>
+        <p class="text-muted small">Onboard your shop, center, or agency on Bhishmaa One</p>
+    </div>
+
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        
+        <div class="section-divider-title mb-3">Business Profile</div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="organization_name" class="form-label fw-medium small">Business / Shop Name</label>
+                {{ form.organization_name(class="form-control rounded-3", placeholder="e.g. Bhishmaa Distributors") }}
+                {% for error in form.organization_name.errors %}
+                    <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                {% endfor %}
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="subdomain" class="form-label fw-medium small">Subdomain Prefix</label>
+                <div class="input-group">
+                    {{ form.subdomain(class="form-control rounded-3-start", placeholder="e.g. bhishmaa") }}
+                    <span class="input-group-text bg-light rounded-3-end border-start-0 small text-muted">.bhishmaa.one</span>
+                </div>
+                {% for error in form.subdomain.errors %}
+                    <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="section-divider-title my-3">Account Owner Settings</div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="first_name" class="form-label fw-medium small">First Name</label>
+                {{ form.first_name(class="form-control rounded-3", placeholder="Enter first name") }}
+                {% for error in form.first_name.errors %}
+                    <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="last_name" class="form-label fw-medium small">Last Name</label>
+                {{ form.last_name(class="form-control rounded-3", placeholder="Enter last name") }}
+                {% for error in form.last_name.errors %}
+                    <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="username" class="form-label fw-medium small">Username</label>
+                {{ form.username(class="form-control rounded-3", placeholder="Select username") }}
+                {% for error in form.username.errors %}
+                    <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="email" class="form-label fw-medium small">Email Address</label>
+                {{ form.email(class="form-control rounded-3", placeholder="admin@yourbusiness.com") }}
+                {% for error in form.email.errors %}
+                    <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="password" class="form-label fw-medium small">Password</label>
+                {{ form.password(class="form-control rounded-3", placeholder="Set password") }}
+                {% for error in form.password.errors %}
+                    <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="col-md-6 mb-4">
+                <label for="confirm_password" class="form-label fw-medium small">Confirm Password</label>
+                {{ form.confirm_password(class="form-control rounded-3", placeholder="Re-enter password") }}
+                {% for error in form.confirm_password.errors %}
+                    <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="d-grid mb-3">
+            {{ form.submit(class="btn btn-indigo rounded-3 py-2 fw-semibold") }}
+        </div>
+    </form>
+
+    <div class="text-center mt-4 border-top pt-3">
+        <span class="text-muted small">Already registered?</span>
+        <a href="{{ url_for('auth.login') }}" class="small fw-semibold text-indigo ms-1">Sign In</a>
+    </div>
+</div>
+{% endblock %}

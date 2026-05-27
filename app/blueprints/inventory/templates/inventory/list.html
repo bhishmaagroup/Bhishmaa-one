@@ -1,0 +1,109 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Inventory & Stock Directory - Bhishmaa One{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('inventory.list_products') }}">Inventory</a></li>
+<li class="breadcrumb-item active" aria-current="page">Product Registry</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main">Inventory & Stocks</h2>
+        <p class="text-muted small mb-0">Monitor catalog items, trace SKU codes, and adjust stock quantities</p>
+    </div>
+    <div>
+        <a href="{{ url_for('inventory.create') }}" class="btn btn-indigo rounded-3 d-flex align-items-center gap-2">
+            <i class="bi bi-box-seam"></i>
+            <span>Add Product</span>
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <!-- Filter Search Bar -->
+    <div class="card-header bg-transparent border-0 px-4 pt-4 pb-2">
+        <form method="GET" action="" class="row g-2 justify-content-start align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="search" value="{{ request.args.get('search', '') }}" class="form-control bg-light border-start-0" placeholder="Search by name, SKU, or barcode..."/>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-indigo rounded-3 px-3 fw-semibold">Search</button>
+                {% if request.args.get('search') %}
+                    <a href="{{ url_for('inventory.list_products') }}" class="btn btn-light rounded-3 px-2 border ms-1" title="Clear Filters">&times;</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    
+    <!-- Products Table -->
+    <div class="card-body px-4 pb-4">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="border-0 rounded-start-3">SKU</th>
+                        <th class="border-0">Product Name</th>
+                        <th class="border-0">Barcode</th>
+                        <th class="border-0">Selling Price</th>
+                        <th class="border-0">Purchase Price</th>
+                        <th class="border-0">GST (%)</th>
+                        <th class="border-0">Stock Level</th>
+                        <th class="border-0 rounded-end-3 text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if products %}
+                        {% for product in products %}
+                        <tr>
+                            <td><span class="text-muted font-monospace small">#{{ product.sku }}</span></td>
+                            <td class="fw-bold text-main">{{ product.name }}</td>
+                            <td><span class="small">{{ product.barcode or "-" }}</span></td>
+                            <td class="fw-semibold">₹ {{ "{:,.2f}".format(product.selling_price) }}</td>
+                            <td><span class="text-muted small">₹ {{ "{:,.2f}".format(product.purchase_price) }}</span></td>
+                            <td>{{ product.gst_rate }}%</td>
+                            <td>
+                                {% set is_low = product.is_low_stock() %}
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-bold {% if is_low %}text-danger{% else %}text-success{% endif %}">
+                                        {{ product.current_stock }} {{ product.get_unit_symbol() }}
+                                    </span>
+                                    {% if is_low %}
+                                        <span class="badge bg-danger-light text-danger rounded-pill px-2 py-1 small" style="font-size: 0.75rem;">Low Stock</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ url_for('inventory.adjust', product_id=product.id) }}" class="btn btn-icon btn-light rounded-circle me-1" title="Adjust Stock">
+                                    <i class="bi bi-arrow-down-up"></i>
+                                </a>
+                                <a href="{{ url_for('inventory.edit', product_id=product.id) }}" class="btn btn-icon btn-light rounded-circle me-1" title="Edit Details">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('inventory.delete', product_id=product.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-icon btn-danger-light text-danger rounded-circle" title="Delete Product">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-box-seam fs-1 mb-2 d-block"></i>
+                                <span>No products registered. Click Add Product to populate your catalog.</span>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

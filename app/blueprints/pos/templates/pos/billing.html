@@ -1,0 +1,243 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}POS Terminal - Bhishmaa One{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-click-add {
+        transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    .product-click-add:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.06) !important;
+        border-color: var(--bs-primary) !important;
+    }
+    .product-click-add:active {
+        transform: translateY(0);
+    }
+    .badge-success-light {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: #198754;
+    }
+    .badge-danger-light {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+    .bg-indigo {
+        background-color: #6610f2 !important;
+    }
+    .bg-indigo-light {
+        background-color: rgba(102, 16, 242, 0.1) !important;
+        color: #6610f2 !important;
+    }
+    .btn-indigo {
+        background-color: #6610f2;
+        color: #fff;
+        border: none;
+    }
+    .btn-indigo:hover {
+        background-color: #520dc2;
+        color: #fff;
+    }
+    .text-indigo {
+        color: #6610f2 !important;
+    }
+    .border-dashed {
+        border-style: dashed !important;
+    }
+    .btn-light-danger {
+        background-color: rgba(220, 53, 69, 0.08);
+        color: #dc3545;
+        border: none;
+    }
+    .btn-light-danger:hover {
+        background-color: #dc3545;
+        color: #fff;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('pos.billing') }}">POS</a></li>
+<li class="breadcrumb-item active" aria-current="page">Terminal</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main"><i class="bi bi-calculator me-2"></i>POS terminal</h2>
+        <p class="text-muted small mb-0">Shift Operator: {{ current_user.first_name }} | Counter: {{ active_session.counter_number }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('pos.barcodes') }}" class="btn btn-light border rounded-3 fw-semibold">
+            <i class="bi bi-upc-scan me-1"></i> Barcode Stickers
+        </a>
+        <a href="{{ url_for('pos.list_transfers') }}" class="btn btn-light border rounded-3 fw-semibold">
+            <i class="bi bi-arrow-left-right me-1"></i> Warehouse Transfers
+        </a>
+        <a href="{{ url_for('pos.settlement') }}" class="btn btn-light-danger rounded-3 fw-bold">
+            <i class="bi bi-power me-1"></i> End Shift Settlement
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Left Column: Product Catalog Grid -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-transparent border-0 px-4 pt-4 pb-2">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-main mb-0"><i class="bi bi-grid-3x3-gap me-2"></i>Product Catalog</h5>
+                    <span class="badge bg-indigo-light fw-bold px-3 py-2 rounded-pill"><i class="bi bi-shop me-1 text-indigo"></i>{{ branch.name }}</span>
+                </div>
+                <!-- Search and Filters -->
+                <div class="row g-2 mb-3">
+                    <div class="col">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" id="catalogSearch" class="form-control bg-light border-start-0" placeholder="Search products by name, SKU or barcode...">
+                        </div>
+                    </div>
+                </div>
+                <!-- Category Tabs -->
+                <div class="d-flex gap-2 overflow-x-auto pb-2" id="categoryFilters">
+                    <button class="btn btn-sm btn-indigo rounded-pill px-3 py-1.5 active-category" data-category-id="all">All Items</button>
+                    {% for cat in categories %}
+                        <button class="btn btn-sm btn-light rounded-pill px-3 py-1.5" data-category-id="{{ cat.id }}">{{ cat.name }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="card-body px-4 pb-4" style="max-height: 550px; overflow-y: auto;">
+                <div class="row row-cols-2 row-cols-md-3 g-3" id="catalogGrid">
+                    {% for prod in products %}
+                    <div class="col product-card-item" data-category="{{ prod.category_id or '' }}" data-search="{{ prod.name.lower() }} {{ prod.sku.lower() }} {{ prod.barcode or '' }}">
+                        <div class="card border border-light h-100 rounded-3 product-click-add" style="cursor: pointer;" 
+                             data-id="{{ prod.id }}" 
+                             data-name="{{ prod.name }}" 
+                             data-sku="{{ prod.sku }}" 
+                             data-price="{{ prod.selling_price }}" 
+                             data-gst="{{ prod.gst_rate }}" 
+                             data-stock="{{ prod.branch_stock_level }}">
+                            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                <div>
+                                    <span class="text-indigo small fw-bold font-monospace">{{ prod.sku }}</span>
+                                    <h6 class="fw-bold mb-1 text-main text-truncate" title="{{ prod.name }}">{{ prod.name }}</h6>
+                                </div>
+                                <div class="mt-3 d-flex justify-content-between align-items-center">
+                                    <span class="fs-5 fw-extrabold text-indigo">₹{{ "{:.2f}".format(prod.selling_price) }}</span>
+                                    {% if prod.branch_stock_level > 0 %}
+                                        <span class="badge badge-success-light rounded-pill font-monospace small">{{ prod.branch_stock_level | int }} units</span>
+                                    {% else %}
+                                        <span class="badge badge-danger-light rounded-pill font-monospace small">0 units</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Cart and Checkout Details -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-transparent border-0 px-4 pt-4 pb-2 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold text-main mb-0"><i class="bi bi-cart3 me-2"></i>Active Cart</h5>
+                <button type="button" class="btn btn-sm btn-light-danger rounded-pill" id="btnClearCart"><i class="bi bi-trash me-1"></i>Clear</button>
+            </div>
+            
+            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <!-- Cart Items Table -->
+                <div class="table-responsive mb-4" style="max-height: 250px; overflow-y: auto;">
+                    <table class="table align-middle" id="posTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="border-0 rounded-start-3">Item</th>
+                                <th class="border-0" style="width: 100px;">Qty</th>
+                                <th class="border-0">Total</th>
+                                <th class="border-0 rounded-end-3 text-end"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartItemsList">
+                            <tr id="emptyCartRow">
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    <i class="bi bi-basket fs-1 mb-2 d-block opacity-25"></i>
+                                    <span class="small">Cart is empty.<br>Click catalog products on the left.</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Customer Details & Summary Form -->
+                <div>
+                    <form id="checkoutForm" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium">Customer Name</label>
+                                <input type="text" id="customer_name" name="customer_name" class="form-control rounded-3" value="Walk-in Client" required autocomplete="off">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium">Phone Number</label>
+                                <input type="text" id="customer_phone" name="customer_phone" class="form-control rounded-3" placeholder="10-digit mobile" autocomplete="off">
+                            </div>
+                        </div>
+                        
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium">Payment Mode</label>
+                                <select id="payment_mode" name="payment_mode" class="form-select rounded-3">
+                                    <option value="Cash">Cash</option>
+                                    <option value="Card">Card</option>
+                                    <option value="UPI">UPI / QR Code</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-medium">Discount (₹)</label>
+                                <input type="number" id="discount" name="discount" class="form-control rounded-3" value="0.00" min="0" step="0.01">
+                            </div>
+                        </div>
+                        
+                        <div class="bg-light rounded-3 p-3 mb-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">Subtotal (excl. Tax):</span>
+                                <span class="fw-semibold text-main small" id="summarySubtotal">₹ 0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">GST (CGST/SGST Split):</span>
+                                <span class="fw-semibold text-main small" id="summaryGST">₹ 0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2 text-danger">
+                                <span class="small">Discount:</span>
+                                <span class="fw-semibold small" id="summaryDiscount">- ₹ 0.00</span>
+                            </div>
+                            <hr class="my-2 border-dashed">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-main">Grand Total:</span>
+                                <span class="fs-4 fw-black text-indigo" id="summaryTotal">₹ 0.00</span>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-indigo rounded-3 w-100 py-3 fw-bold d-flex align-items-center justify-content-center gap-2">
+                            <i class="bi bi-receipt-cutoff"></i>
+                            <span>Complete Checkout & Print Bill</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const ORG_STATE_CODE = "07";  // Default state code (Delhi)
+    const POST_URL = "{{ url_for('billing.api_create_invoice') }}";
+</script>
+<script src="{{ url_for('pos.static', filename='js/pos.js') }}"></script>
+{% endblock %}

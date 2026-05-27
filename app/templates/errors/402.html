@@ -1,0 +1,42 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Module Locked - Bhishmaa One{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center mt-5">
+    <div class="col-md-7 col-lg-6 text-center">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-slate-card">
+            <div class="card-body p-5">
+                <div class="mb-4">
+                    <span class="d-inline-flex align-items-center justify-content-center bg-warning-light text-warning rounded-circle p-4" style="width: 100px; height: 100px;">
+                        <i class="bi bi-shield-lock-fill" style="font-size: 3rem;"></i>
+                    </span>
+                </div>
+                
+                <h2 class="fw-bold text-main mb-2">Module Access Restricted</h2>
+                <p class="text-muted mb-4">
+                    This module is currently locked under your business subscription plan. 
+                    Please upgrade your plan or enable this feature in the control panel to access.
+                </p>
+                
+                <div class="alert alert-warning border-0 rounded-3 text-start small mb-4 py-3">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="bi bi-info-circle-fill fs-5 text-warning"></i>
+                        <strong class="text-dark">Locked Feature:</strong>
+                    </div>
+                    <span class="font-monospace text-muted">{{ error.description if error and error.description else "Requested SaaS module" }}</span>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('dashboard.index') }}" class="btn btn-light rounded-3 px-4 fw-semibold border">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                    </a>
+                    <a href="mailto:support@bhishmaa.one" class="btn btn-indigo rounded-3 px-4 fw-bold shadow-sm">
+                        <i class="bi bi-lightning-charge me-1"></i> Contact Administrator
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

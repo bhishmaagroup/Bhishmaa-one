@@ -1,0 +1,65 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Manage Organizations - Super Admin Dashboard{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('organizations.profile') }}">Organizations</a></li>
+<li class="breadcrumb-item active" aria-current="page">Manage</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main">SaaS Organizations Registry</h2>
+        <p class="text-muted small mb-0">Super Admin monitoring console for all registered business tenants</p>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="border-0 rounded-start-3">Business Name</th>
+                        <th class="border-0">Subdomain Slug</th>
+                        <th class="border-0">Registered On</th>
+                        <th class="border-0">Active Plan</th>
+                        <th class="border-0">Status</th>
+                        <th class="border-0 rounded-end-3 text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for org in orgs %}
+                    <tr>
+                        <td class="fw-bold text-main">{{ org.name }}</td>
+                        <td><span class="text-muted font-monospace small">{{ org.subdomain }}.bhishmaa.one</span></td>
+                        <td>{{ org.created_at.strftime('%d-%b-%Y') }}</td>
+                        <td><span class="badge bg-indigo-light text-indigo px-3 py-2">{{ org.plan_name }}</span></td>
+                        <td>
+                            {% if org.is_active %}
+                                <span class="badge bg-success-light text-success rounded-pill px-3 py-2">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger-light text-danger rounded-pill px-3 py-2">Suspended</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <form method="POST" action="{{ url_for('organizations.admin_suspend', org_id=org.id) }}" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="submit" class="btn btn-sm {% if org.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %} fw-semibold rounded-3 px-3">
+                                    {% if org.is_active %}
+                                        <i class="bi bi-slash-circle me-1"></i> Suspend
+                                    {% else %}
+                                        <i class="bi bi-check-circle me-1"></i> Activate
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

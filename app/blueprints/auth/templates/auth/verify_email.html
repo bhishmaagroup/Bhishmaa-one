@@ -1,0 +1,17 @@
+{% extends "layouts/auth_base.html" %}
+
+{% block title %}Verify Email - Bhishmaa One{% endblock %}
+
+{% block content %}
+<div class="auth-card shadow-lg border-0 p-4 p-md-5 rounded-4 text-center">
+    <div class="brand-logo-icon d-inline-flex mb-3 bg-success">
+        <i class="bi bi-check2 text-white fs-3"></i>
+    </div>
+    <h3 class="fw-bold tracking-tight">Email Verified</h3>
+    <p class="text-muted small mb-4">Your business administrator email has been successfully verified.</p>
+    
+    <div class="d-grid">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-indigo rounded-3 py-2 fw-semibold">Sign In</a>
+    </div>
+</div>
+{% endblock %}

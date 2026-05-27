@@ -1,0 +1,217 @@
+<USER_REQUEST>
+# Bhishmaa ERP — Complete Final Master Structure
+
+# FINAL PRODUCT VISION
+
+Bhishmaa ERP is a:
+
+* Multi-Business ERP
+* SaaS Ready Platform
+* Offline + Online System
+* Modular Business Operating System
+
+Supports:
+
+* Billing
+* Inventory
+* Accounting
+* CRM
+* HRMS
+* Payroll
+* Schools
+* Retail Shops
+* Distributors
+* Service Businesses
+* Multi Branch Companies
+
+---
+
+# COMPLETE FINAL PROJECT STRUCTURE
+
+```text
+bhishmaa_erp/
+│
+├── app/
+│   │
+│   ├── __init__.py
+│   │
+│   ├── core/
+│   │   ├── config.py
+│   │   ├── extensions.py
+│   │   ├── middleware.py
+│   │   ├── permissions.py
+│   │   ├── decorators.py
+│   │   ├── tenant.py
+│   │   ├── bootstrap.py
+│   │   ├── security.py
+│   │   ├── logging.py
+│   │   ├── cache.py
+│   │   ├── constants.py
+│   │   ├── exceptions.py
+│   │   ├── helpers.py
+│   │   ├── validators.py
+│   │   └── filters.py
+│   │
+│   ├── models/
+│   │   ├── base.py
+│   │   ├── user.py
+│   │   ├── role.py
+│   │   ├── permission.py
+│   │   ├── company.py
+│   │   ├── employee.py
+│   │   ├── notification.py
+│   │   ├── audit_log.py
+│   │   ├── setting.py
+│   │   ├── activity_log.py
+│   │   ├── login_history.py
+│   │   └── api_token.py
+│   │
+│   ├── modules/
+│   │   │
+│   │   ├── auth/
+│   │   │   ├── routes.py
+│   │   │   ├── services.py
+│   │   │   ├── forms.py
+│   │   │   ├── validators.py
+│   │   │   └── utils.py
+│   │   │
+│   │   ├── dashboard/
+│   │   │   ├── routes.py
+│   │   │   ├── services.py
+│   │   │   ├── widgets.py
+│   │   │   └── analytics.py
+
+<truncated 8553 bytes>
+* Customer History
+
+---
+
+# HRMS FEATURES
+
+## Features
+
+* Employees
+* Attendance
+* Payroll
+* Salary Slips
+* Leave Management
+* Departments
+* Employee Documents
+* Bonus System
+
+---
+
+# REPORT FEATURES
+
+## Features
+
+* Sales Reports
+* Profit Reports
+* GST Reports
+* Inventory Reports
+* Payroll Reports
+* Attendance Reports
+* Analytics Dashboard
+* Export Excel/PDF
+
+---
+
+# SAAS FEATURES
+
+## Features
+
+* Subscription Plans
+* Razorpay Integration
+* Trial System
+* Feature Limiter
+* Usage Tracking
+* Tenant Billing
+* Company Onboarding
+
+---
+
+# AUTOMATION FEATURES
+
+## Features
+
+* Workflow Automation
+* Rule Engine
+* Approval System
+* Trigger Actions
+* Notifications
+* Auto Purchase Draft
+* Auto Followups
+
+---
+
+# OFFLINE FEATURES
+
+## Features
+
+* SQLite Offline
+* Sync Queue
+* Conflict Resolver
+* Delayed Sync
+* Offline Billing
+
+---
+
+# AI FEATURES
+
+## Features
+
+* Smart Reports
+* Forecasting
+* Revenue Prediction
+* Inventory Prediction
+* AI Analytics
+
+---
+
+# SECURITY FEATURES
+
+## Mandatory
+
+* CSRF Protection
+* XSS Protection
+* Password Hashing
+* Rate Limiting
+* File Validation
+* Session Security
+* Audit Logging
+
+---
+
+# PERFORMANCE FEATURES
+
+## Features
+
+* Redis Cache
+* Celery Workers
+* Async Tasks
+* Optimized Queries
+* Pagination
+* Background Processing
+
+---
+
+# FINAL PRODUCT LEVEL
+
+After complete build:
+
+Bhishmaa ERP becomes:
+
+* Production Grade ERP
+* Multi Business SaaS
+* Enterprise Ready System
+* Offline + Online ERP
+* Scalable Business Platform
+* Indian GST Ready ERP " only follow this plan dont make your plan "
+
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-05-26T17:04:26+05:30.
+</ADDITIONAL_METADATA>
+<USER_SETTINGS_CHANGE>
+The user changed setting `Model Selection` from None to Gemini 3.5 Flash (High). No need to comment on this change if the user doesn't ask about it. If reporting what model you are, please use a human readable name instead of the exact string.
+</USER_SETTINGS_CHANGE>

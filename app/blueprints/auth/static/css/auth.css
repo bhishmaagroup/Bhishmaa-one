@@ -1,0 +1,19 @@
+/* Auth module specific stylesheet */
+
+.tracking-widest {
+    letter-spacing: 0.3em;
+}
+
+.auth-card-wide {
+    max-width: 680px;
+}
+
+.section-divider-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 4px;
+    letter-spacing: 0.5px;
+}

@@ -1,0 +1,14 @@
+/* Users module specific stylesheet */
+
+.profile-avatar {
+    background-color: var(--color-primary) !important;
+}
+
+.bg-indigo-light {
+    background-color: var(--color-primary-light) !important;
+    color: var(--color-primary) !important;
+}
+
+.text-indigo {
+    color: var(--color-primary) !important;
+}

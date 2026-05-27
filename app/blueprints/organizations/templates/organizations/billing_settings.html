@@ -1,0 +1,112 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}GST & Billing Settings - Bhishmaa One{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('organizations.profile') }}">Organizations</a></li>
+<li class="breadcrumb-item active" aria-current="page">Billing Settings</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4 mt-3">
+    <!-- Navigation Sidebar Profile Links -->
+    <div class="col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-3">
+                <div class="nav flex-column nav-pills gap-1">
+                    <a class="nav-link rounded-3 py-2 px-3 fw-semibold text-main" href="{{ url_for('organizations.profile') }}">
+                        <i class="bi bi-building me-2"></i> Business Profile
+                    </a>
+                    <a class="nav-link active rounded-3 py-2 px-3 fw-semibold" href="{{ url_for('organizations.billing_settings') }}">
+                        <i class="bi bi-receipt me-2"></i> GST & Billing Settings
+                    </a>
+                    <a class="nav-link rounded-3 py-2 px-3 fw-semibold text-main" href="{{ url_for('organizations.subscription') }}">
+                        <i class="bi bi-shield-lock me-2"></i> Subscription Plan
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Panel Form -->
+    <div class="col-lg-9">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-transparent border-0 px-4 pt-4">
+                <h5 class="fw-bold mb-1 text-main">GST & Billing Parameters</h5>
+                <p class="text-muted small mb-0">Configure taxation and invoicing details</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="gstin" class="form-label fw-medium small">GSTIN Number</label>
+                            {{ form.gstin(class="form-control rounded-3", placeholder="15-character GST identification") }}
+                            {% for error in form.gstin.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="state_code" class="form-label fw-medium small">Default State Code (GST Jurisdiction)</label>
+                            {{ form.state_code(class="form-select rounded-3") }}
+                            {% for error in form.state_code.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="billing_email" class="form-label fw-medium small">Billing Email Address</label>
+                            {{ form.billing_email(class="form-control rounded-3", placeholder="billing@yourbusiness.com") }}
+                            {% for error in form.billing_email.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="billing_phone" class="form-label fw-medium small">Billing Contact Phone</label>
+                            {{ form.billing_phone(class="form-control rounded-3", placeholder="Enter billing phone") }}
+                            {% for error in form.billing_phone.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="pan_number" class="form-label fw-medium small">Business PAN</label>
+                            {{ form.pan_number(class="form-control rounded-3", placeholder="10-character PAN") }}
+                            {% for error in form.pan_number.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="currency" class="form-label fw-medium small">Accounting Currency</label>
+                            {{ form.currency(class="form-select rounded-3") }}
+                            {% for error in form.currency.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="billing_address" class="form-label fw-medium small">Invoicing Address</label>
+                        {{ form.billing_address(class="form-control rounded-3", rows="3", placeholder="Enter full registered address") }}
+                        {% for error in form.billing_address.errors %}
+                            <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        {{ form.submit(class="btn btn-indigo rounded-3 px-4 fw-semibold") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

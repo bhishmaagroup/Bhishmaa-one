@@ -1,0 +1,162 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Sticker Label Printer - Bhishmaa One{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Sticker grid design */
+    .sticker-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .sticker-card {
+        border: 1px solid #dee2e6;
+        padding: 15px;
+        text-align: center;
+        background: #fff;
+        border-radius: 8px;
+        position: relative;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    
+    .sticker-card img {
+        max-width: 100%;
+        height: auto;
+        margin: 10px 0;
+    }
+
+    /* Print styling rules */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .print-area, .print-area * {
+            visibility: visible;
+        }
+        .print-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none !important;
+        }
+        .sticker-container {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 10px !important;
+        }
+        .sticker-card {
+            border: 1px solid #000 !important;
+            box-shadow: none !important;
+            break-inside: avoid;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('pos.billing') }}">POS</a></li>
+<li class="breadcrumb-item active" aria-current="page">Sticker Labels</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3 no-print">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main"><i class="bi bi-upc-scan me-2 text-indigo"></i>Sticker Label Generator</h2>
+        <p class="text-muted small mb-0">Generate and print high-quality retail price tags and barcodes for thermal sticker sheets</p>
+    </div>
+    <div>
+        <button type="button" class="btn btn-indigo rounded-3 fw-bold px-4" onclick="window.print();">
+            <i class="bi bi-printer me-2"></i>Print Sticker Sheet
+        </button>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4 no-print">
+    <div class="card-header bg-transparent border-0 px-4 pt-4">
+        <h5 class="fw-bold text-main mb-0">Label Customizer</h5>
+    </div>
+    
+    <div class="card-body px-4 pb-4">
+        <form method="GET" action="" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small fw-semibold text-muted">Select Product</label>
+                <select name="product_id" class="form-select rounded-3" required>
+                    <option value="" disabled {% if not selected_product %}selected{% endif %}>Choose a product...</option>
+                    {% for p in products %}
+                        <option value="{{ p.id }}" {% if selected_product and selected_product.id == p.id %}selected{% endif %}>{{ p.name }} (SKU: {{ p.sku }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted">Quantity</label>
+                <input type="number" name="quantity" class="form-control rounded-3" value="{{ quantity }}" min="1" max="100">
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold text-muted">Label Sticker Style</label>
+                <select name="type" class="form-select rounded-3">
+                    <option value="barcode" {% if label_type == 'barcode' %}selected{% endif %}>Barcode Only (CODE128)</option>
+                    <option value="qrcode" {% if label_type == 'qrcode' %}selected{% endif %}>QR Code Only</option>
+                    <option value="both" {% if label_type == 'both' %}selected{% endif %}>Split: Barcode + QR</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-indigo rounded-3 w-100 fw-bold">
+                    <i class="bi bi-gear me-1"></i>Generate Stickers
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if selected_product %}
+<div class="print-area">
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+        <h5 class="fw-bold text-main mb-3 no-print">Preview (Print Sheet)</h5>
+        
+        <div class="sticker-container">
+            {% for i in range(quantity) %}
+            <div class="sticker-card">
+                <!-- Header Name -->
+                <div class="small fw-black text-dark text-truncate">{{ selected_product.name }}</div>
+                
+                <!-- Code representations -->
+                {% if label_type == 'barcode' %}
+                    <img src="data:image/png;base64,{{ barcode_base64 }}" alt="Barcode">
+                    <div class="small font-monospace text-muted mt-1">{{ selected_product.barcode or selected_product.sku }}</div>
+                {% elif label_type == 'qrcode' %}
+                    <img src="data:image/png;base64,{{ qrcode_base64 }}" alt="QR Code" style="width: 80px; height: 80px; margin: 5px auto;">
+                    <div class="small font-monospace text-muted mt-1">{{ selected_product.sku }}</div>
+                {% else %}
+                    <div class="d-flex justify-content-center align-items-center gap-2">
+                        <img src="data:image/png;base64,{{ barcode_base64 }}" alt="Barcode" style="width: 60%;">
+                        <img src="data:image/png;base64,{{ qrcode_base64 }}" alt="QR Code" style="width: 40px; height: 40px;">
+                    </div>
+                    <div class="small font-monospace text-muted mt-1">{{ selected_product.sku }}</div>
+                {% endif %}
+                
+                <!-- Price details -->
+                <div class="fw-bold text-dark mt-2">MRP: ₹{{ "{:.2f}".format(selected_product.selling_price) }}</div>
+                <div class="small text-muted" style="font-size: 0.7rem;">Bhishmaa One Retail</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card border-0 shadow-sm rounded-4 p-5 text-center no-print">
+    <div class="text-muted">
+        <i class="bi bi-upc-scan fs-1 d-block mb-3 opacity-25"></i>
+        <h6 class="fw-bold">No product selected</h6>
+        <p class="small mb-0">Select a product and customize the quantity above to display label sheets.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

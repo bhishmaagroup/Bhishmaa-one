@@ -1,0 +1,150 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Invoice Details - {{ invoice.invoice_number }}{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('billing.list_invoices') }}">Billing</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ invoice.invoice_number }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main">Invoice details: {{ invoice.invoice_number }}</h2>
+        <p class="text-muted small mb-0">Generated on {{ invoice.created_at.strftime('%d-%b-%Y %I:%M %p') }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('billing.list_invoices') }}" class="btn btn-light border rounded-3 px-3 fw-semibold">
+            <i class="bi bi-arrow-left me-1"></i> Registry
+        </a>
+        <a href="{{ url_for('billing.edit_invoice_route', invoice_id=invoice.id) }}" class="btn btn-warning rounded-3 px-3 fw-semibold text-white">
+            <i class="bi bi-pencil me-1"></i> Edit Invoice
+        </a>
+        <a href="{{ url_for('billing.print_invoice', invoice_id=invoice.id) }}" target="_blank" class="btn btn-indigo rounded-3 px-3 fw-semibold">
+            <i class="bi bi-printer me-1"></i> Print Invoice
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <!-- Invoice Header Grid (Seller vs Buyer details) -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <span class="text-uppercase fw-bold text-muted small tracking-wider">Seller (Issued By)</span>
+                <div class="mt-2">
+                    <h5 class="fw-bold text-main mb-1">{{ current_user.organization.name }}</h5>
+                    <p class="text-muted small mb-1">
+                        <strong>GSTIN:</strong> {{ org_detail.gstin if (org_detail and org_detail.gstin) else "None" }}<br>
+                        <strong>State Code:</strong> {{ org_detail.state_code if (org_detail and org_detail.state_code) else "07" }}<br>
+                        <strong>Address:</strong> {{ org_detail.billing_address if (org_detail and org_detail.billing_address) else "-" }}<br>
+                        <strong>Email:</strong> {{ org_detail.billing_email or "-" }}
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 text-md-end">
+                <span class="text-uppercase fw-bold text-muted small tracking-wider">Buyer (Billed To)</span>
+                <div class="mt-2">
+                    <h5 class="fw-bold text-main mb-1">{{ invoice.customer_name }}</h5>
+                    <p class="text-muted small mb-1">
+                        <strong>Phone:</strong> {{ invoice.customer_phone or "-" }}<br>
+                        <strong>GSTIN:</strong> {{ invoice.customer_gstin or "-" }}<br>
+                        <strong>State Code:</strong> {{ invoice.customer_state_code or "-" }}
+                    </p>
+                    <div class="mt-3">
+                        <span class="text-muted small">Status:</span>
+                        {% if invoice.status == 'Paid' %}
+                            <span class="badge bg-success-light text-success rounded-pill px-3 py-1.5 small ms-1">Paid</span>
+                        {% elif invoice.status == 'Partial' %}
+                            <span class="badge bg-warning-light text-warning rounded-pill px-3 py-1.5 small ms-1">Partial</span>
+                        {% else %}
+                            <span class="badge bg-danger-light text-danger rounded-pill px-3 py-1.5 small ms-1">Unpaid</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <!-- Line Items Table -->
+        <h5 class="fw-bold text-main mb-3">Invoice Items</h5>
+        <div class="table-responsive mb-4">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="border-0 rounded-start-3">Product Name</th>
+                        <th class="border-0">Rate (₹)</th>
+                        <th class="border-0">Qty</th>
+                        <th class="border-0">GST (%)</th>
+                        <th class="border-0">CGST (₹)</th>
+                        <th class="border-0">SGST (₹)</th>
+                        <th class="border-0">IGST (₹)</th>
+                        <th class="border-0 rounded-end-3 text-end">Total Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in invoice.items %}
+                    <tr>
+                        <td class="fw-bold text-main">{{ item.product_name }}</td>
+                        <td>₹ {{ "{:,.2f}".format(item.unit_price) }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.gst_rate }}%</td>
+                        <td>₹ {{ "{:,.2f}".format(item.cgst_amount) }}</td>
+                        <td>₹ {{ "{:,.2f}".format(item.sgst_amount) }}</td>
+                        <td>₹ {{ "{:,.2f}".format(item.igst_amount) }}</td>
+                        <td class="fw-bold text-end">₹ {{ "{:,.2f}".format(item.total_amount) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Totals break-up -->
+        <div class="row justify-content-end">
+            <div class="col-md-5">
+                <div class="bg-light rounded-3 p-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Taxable Subtotal:</span>
+                        <span class="fw-semibold text-main small">₹ {{ "{:,.2f}".format(invoice.sub_total) }}</span>
+                    </div>
+                    {% if invoice.cgst > 0 or invoice.sgst > 0 %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">CGST Amount:</span>
+                        <span class="fw-semibold text-main small">₹ {{ "{:,.2f}".format(invoice.cgst) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">SGST Amount:</span>
+                        <span class="fw-semibold text-main small">₹ {{ "{:,.2f}".format(invoice.sgst) }}</span>
+                    </div>
+                    {% endif %}
+                    {% if invoice.igst > 0 %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">IGST Amount:</span>
+                        <span class="fw-semibold text-main small">₹ {{ "{:,.2f}".format(invoice.igst) }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Amount Paid:</span>
+                        <span class="fw-semibold text-main small">₹ {{ "{:,.2f}".format(invoice.amount_paid) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Amount Due:</span>
+                        <span class="fw-semibold text-danger small">₹ {{ "{:,.2f}".format(invoice.get_pending_amount()) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 text-danger">
+                        <span class="small">Discount:</span>
+                        <span class="fw-semibold small">- ₹ {{ "{:,.2f}".format(invoice.discount) }}</span>
+                    </div>
+                    <hr class="my-2 border-dashed">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-main">Total Paid/Due:</span>
+                        <span class="fs-4 fw-black text-indigo">₹ {{ "{:,.2f}".format(invoice.total_amount) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

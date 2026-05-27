@@ -1,0 +1,370 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Profit & Loss Statement - Bhishmaa One{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('reports.dashboard') }}">Reports</a></li>
+<li class="breadcrumb-item active" aria-current="page">P&L Sheet</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main"><i class="bi bi-currency-rupee me-2"></i>Profit & Loss Statement</h2>
+        <p class="text-muted small mb-0 font-monospace">Interval: {{ start_date }} to {{ end_date }}</p>
+    </div>
+    <div>
+        <a href="{{ url_for('reports.dashboard') }}" class="btn btn-light border rounded-3 px-3 fw-semibold">
+            <i class="bi bi-arrow-left me-1"></i> Back to Hub
+        </a>
+    </div>
+</div>
+
+<!-- Date Picker -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-3">
+        <form method="GET" action="{{ url_for('reports.profit_loss_report') }}" class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <label class="form-label small fw-medium">From Date</label>
+                <input type="date" name="start_date" class="form-control rounded-3" value="{{ start_date }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-medium">To Date</label>
+                <input type="date" name="end_date" class="form-control rounded-3" value="{{ end_date }}">
+            </div>
+            <div class="col-md-3 mt-md-4 pt-md-2">
+                <button type="submit" class="btn btn-indigo rounded-3 w-100 fw-semibold">Apply Interval</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Balance Sheet Grid -->
+<div class="row g-4 mb-4">
+    <!-- Summary Cards and Net Profit -->
+    <div class="col-lg-6">
+        <div class="row g-3 h-100">
+            <!-- Gross Revenue Card -->
+            <div class="col-sm-6">
+                <div class="card border-0 shadow-sm rounded-4 bg-white p-3 border-start border-4 border-success h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-success-light text-success rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="bi bi-graph-up fs-5"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Gross Potential Revenue</span>
+                            <h4 class="fw-bold text-main mb-0">₹{{ "{:,.2f}".format(pl.gross_revenue) }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Realized Cash Card -->
+            <div class="col-sm-6">
+                <div class="card border-0 shadow-sm rounded-4 bg-white p-3 border-start border-4 border-primary h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-primary-light text-primary rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="bi bi-wallet2 fs-5"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Realized Cash Inflow</span>
+                            <h4 class="fw-bold text-main mb-0">₹{{ "{:,.2f}".format(pl.realized_revenue) }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expenses Card -->
+            <div class="col-sm-6">
+                <div class="card border-0 shadow-sm rounded-4 bg-white p-3 border-start border-4 border-danger h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-danger-light text-danger rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="bi bi-cash-stack fs-5"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Operating Expenses</span>
+                            <h4 class="fw-bold text-main mb-0">₹{{ "{:,.2f}".format(pl.expenses) }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payroll Card -->
+            <div class="col-sm-6">
+                <div class="card border-0 shadow-sm rounded-4 bg-white p-3 border-start border-4 border-warning h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-warning-light text-warning rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="bi bi-people fs-5"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Payroll Costs</span>
+                            <h4 class="fw-bold text-main mb-0">₹{{ "{:,.2f}".format(pl.payroll) }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discount Loss Card -->
+            <div class="col-sm-6">
+                <div class="card border-0 shadow-sm rounded-4 bg-white p-3 border-start border-4 border-danger h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-danger-light text-danger rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="bi bi-tag fs-5"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Loss because of Discount</span>
+                            <h4 class="fw-bold text-danger mb-0">₹{{ "{:,.2f}".format(pl.discounts) }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Unpaid Loss Card -->
+            <div class="col-sm-6">
+                <div class="card border-0 shadow-sm rounded-4 bg-white p-3 border-start border-4 border-danger h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-danger-light text-danger rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="bi bi-exclamation-triangle fs-5"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Loss because of Unpaid Sales</span>
+                            <h4 class="fw-bold text-danger mb-0">₹{{ "{:,.2f}".format(pl.unpaid_loss) }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>      </div>
+
+            <!-- Net Statement Card -->
+            <div class="col-12 mt-2">
+                {% set profit_percentage = (pl.net_profit / pl.gross_revenue * 100.0) if pl.gross_revenue > 0 else 0.0 %}
+                <div class="card border-0 shadow-sm rounded-4 p-4 border {% if pl.net_profit >= 0 %}bg-success-light border-success text-success{% else %}bg-danger-light border-danger text-danger{% endif %} h-100 d-flex flex-column justify-content-center">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold mb-1">NET BUSINESS PROFIT / LOSS</h5>
+                            <span class="text-muted small">Calculated as: Gross Revenue - (Expenses + Payroll + Discounts + Unpaid Losses)</span>
+                        </div>
+                        <div class="text-end">
+                            <h2 class="fw-black mb-0 fs-1">₹ {{ "{:,.2f}".format(pl.net_profit) }}</h2>
+                            <span class="badge {% if pl.net_profit >= 0 %}bg-success text-white{% else %}bg-danger text-white{% endif %} rounded-pill px-3 py-1.5 small mt-1">
+                                Profit Margin: {{ "{:.1f}".format(profit_percentage) }}%
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Visual Chart Representation -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-transparent border-0 px-4 pt-4 pb-0">
+                <h5 class="fw-bold text-main mb-0"><i class="bi bi-bar-chart-line me-2 text-indigo"></i>Financial Comparison Chart</h5>
+            </div>
+            <div class="card-body p-4">
+                <div style="position: relative; height: 280px; width: 100%;">
+                    <canvas id="plChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Tabular Breakdowns -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-header bg-transparent border-0 px-4 pt-4">
+        <h5 class="fw-bold text-main mb-3"><i class="bi bi-file-text me-2 text-indigo"></i>Itemized Transaction Breakdown</h5>
+        
+        <!-- Tabs Nav -->
+        <ul class="nav nav-tabs border-bottom" id="plTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-semibold text-indigo" id="revenue-tab" data-bs-toggle="tab" data-bs-target="#revenue-pane" type="button" role="tab" aria-controls="revenue-pane" aria-selected="true">
+                    Revenues ({{ pl.invoices_list|length }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-semibold text-indigo" id="expenses-tab" data-bs-toggle="tab" data-bs-target="#expenses-pane" type="button" role="tab" aria-controls="expenses-pane" aria-selected="false">
+                    Expenses ({{ pl.expenses_list|length }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-semibold text-indigo" id="payroll-tab" data-bs-toggle="tab" data-bs-target="#payroll-pane" type="button" role="tab" aria-controls="payroll-pane" aria-selected="false">
+                    Payroll ({{ pl.payroll_list|length }})
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card-body p-4">
+        <div class="tab-content" id="plTabContent">
+            <!-- Revenue Tab Panel -->
+            <div class="tab-pane fade show active" id="revenue-pane" role="tabpanel" aria-labelledby="revenue-tab" tabindex="0">
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="border-0 rounded-start-3">Invoice Number</th>
+                                <th class="border-0">Date</th>
+                                <th class="border-0">Customer</th>
+                                <th class="border-0">Payment Mode</th>
+                                <th class="border-0 rounded-end-3 text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for inv in pl.invoices_list %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('billing.details', invoice_id=inv.id) }}" class="font-monospace fw-bold text-decoration-none">
+                                        {{ inv.invoice_number }}
+                                    </a>
+                                </td>
+                                <td>{{ inv.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ inv.customer_name }}</td>
+                                <td><span class="badge bg-light text-dark">{{ inv.payment_mode }}</span></td>
+                                <td class="fw-bold text-success text-end">₹{{ "{:,.2f}".format(inv.total_amount) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-receipt fs-1 mb-2 d-block opacity-25"></i>
+                                    <span>No invoice revenues recorded in this interval.</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Expenses Tab Panel -->
+            <div class="tab-pane fade" id="expenses-pane" role="tabpanel" aria-labelledby="expenses-tab" tabindex="0">
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="border-0 rounded-start-3">Category</th>
+                                <th class="border-0">Date</th>
+                                <th class="border-0">Description</th>
+                                <th class="border-0">Payment Mode</th>
+                                <th class="border-0 rounded-end-3 text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exp in pl.expenses_list %}
+                            <tr>
+                                <td><span class="badge bg-indigo-light text-indigo px-3 py-1.5 rounded-pill">{{ exp.category }}</span></td>
+                                <td>{{ exp.date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ exp.description or 'N/A' }}</td>
+                                <td><span class="badge bg-light text-dark">{{ exp.payment_mode }}</span></td>
+                                <td class="fw-bold text-danger text-end">₹{{ "{:,.2f}".format(exp.amount) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-cash-stack fs-1 mb-2 d-block opacity-25"></i>
+                                    <span>No operating expenses recorded in this interval.</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Payroll Tab Panel -->
+            <div class="tab-pane fade" id="payroll-pane" role="tabpanel" aria-labelledby="payroll-tab" tabindex="0">
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="border-0 rounded-start-3">Payslip Number</th>
+                                <th class="border-0">Payment Date</th>
+                                <th class="border-0">Employee Name</th>
+                                <th class="border-0">Month / Year</th>
+                                <th class="border-0 rounded-end-3 text-end">Net Salary Paid</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for slip in pl.payroll_list %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('hrm.view_payroll_slip', slip_id=slip.id) }}" class="font-monospace fw-bold text-decoration-none">
+                                        {{ slip.slip_number }}
+                                    </a>
+                                </td>
+                                <td>{{ slip.payment_date.strftime('%Y-%m-%d') if slip.payment_date else 'N/A' }}</td>
+                                <td>{{ slip.user.first_name }} {{ slip.user.last_name }}</td>
+                                <td>
+                                    {{ ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][slip.month - 1] }} {{ slip.year }}
+                                </td>
+                                <td class="fw-bold text-danger text-end">₹{{ "{:,.2f}".format(slip.net_salary) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-people fs-1 mb-2 d-block opacity-25"></i>
+                                    <span>No staff payroll disbursements paid in this interval.</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const ctx = document.getElementById('plChart').getContext('2d');
+        const revenue = parseFloat("{{ pl.gross_revenue }}") || 0;
+        const totalOutflows = parseFloat("{{ pl.total_outflows_and_losses }}") || 0;
+        const netProfit = parseFloat("{{ pl.net_profit }}") || 0;
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Gross Revenue', 'Total Outflows & Losses', 'Net Profit'],
+                datasets: [{
+                    label: 'Financial P&L Metric (₹)',
+                    data: [revenue, totalOutflows, netProfit],
+                    backgroundColor: [
+                        'rgba(25, 135, 84, 0.75)',  // green
+                        'rgba(220, 53, 69, 0.75)',   // red
+                        netProfit >= 0 ? 'rgba(102, 16, 242, 0.75)' : 'rgba(220, 53, 69, 0.75)' // indigo / red
+                    ],
+                    borderColor: [
+                        '#198754',
+                        '#dc3545',
+                        netProfit >= 0 ? '#6610f2' : '#dc3545'
+                    ],
+                    borderWidth: 1.5,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '₹' + value.toLocaleString('en-IN');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

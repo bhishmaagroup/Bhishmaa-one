@@ -1,0 +1,14 @@
+/* Organizations module specific stylesheet */
+
+.bg-indigo-light {
+    background-color: var(--color-primary-light) !important;
+    color: var(--color-primary) !important;
+}
+
+.text-indigo {
+    color: var(--color-primary) !important;
+}
+
+.progress-bar.bg-indigo {
+    background-color: var(--color-primary) !important;
+}

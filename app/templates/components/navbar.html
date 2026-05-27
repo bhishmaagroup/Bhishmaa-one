@@ -1,0 +1,107 @@
+<nav class="navbar navbar-expand-lg app-navbar px-3">
+    <div class="container-fluid">
+        <!-- Sidebar Toggle Hamburger -->
+        <button class="btn sidebar-toggle-btn me-3" id="sidebarToggle" onclick="toggleSidebar()">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        
+        <!-- Organization Brand Info -->
+        <div class="navbar-brand-tenant d-flex align-items-center flex-wrap gap-1">
+            <span class="badge bg-indigo-light text-indigo me-1">Active business</span>
+            <span class="tenant-name fw-semibold text-truncate me-2" style="max-width: 200px;">
+                {{ current_user.organization.name if current_user.organization else 'Bhishmaa One' }}
+            </span>
+            {% if session.get('impersonator_platform_user_id') %}
+                <span class="badge bg-danger">Impersonating</span>
+                <a href="{{ url_for('platform.stop_impersonate') }}" class="btn btn-xs btn-danger ms-1 py-1 px-2 fw-bold rounded-2 text-white text-decoration-none" style="font-size: 11px;">
+                    <i class="bi bi-x-circle me-1"></i>Stop Impersonation
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarContent">
+            <!-- Search Bar -->
+            <form class="d-none d-md-flex navbar-search me-4" role="search">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input class="form-control bg-light border-start-0" type="search" placeholder="Quick search invoices, stocks..." aria-label="Search">
+                </div>
+            </form>
+
+            <!-- Action Controls -->
+            <div class="d-flex align-items-center gap-3">
+                <!-- Theme Toggle Toggler -->
+                <button class="btn btn-icon theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                    <i class="bi bi-sun sun-icon fs-5"></i>
+                    <i class="bi bi-moon moon-icon fs-5"></i>
+                </button>
+
+                <!-- Alerts Notification Dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-icon position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-bell fs-5"></i>
+                        {% if unread_count > 0 %}
+                            <span class="position-absolute top-1 start-75 translate-middle badge rounded-pill bg-danger" style="font-size: 8px; padding: 2px 4px;">{{ unread_count }}</span>
+                        {% endif %}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end py-2" style="width: 280px; max-height: 350px; overflow-y: auto;">
+                        <li class="dropdown-header text-uppercase fw-bold text-muted small px-3 py-2">System Alerts ({{ unread_count }})</li>
+                        <li><hr class="dropdown-divider"></li>
+                        {% for notif in unread_notifications %}
+                            <li>
+                                <a class="dropdown-item px-3 py-2" href="{{ url_for('notifications.read_notification_route', notif_id=notif.id) }}">
+                                    <div class="d-flex align-items-center gap-1.5 mb-0.5">
+                                        <span class="badge {% if notif.type == 'Stock Alert' %}bg-danger-light text-danger{% elif notif.type == 'Sales' %}bg-success-light text-success{% else %}bg-indigo-light text-indigo{% endif %} font-monospace" style="font-size: 8px; padding: 1px 4px;">{{ notif.type }}</span>
+                                    </div>
+                                    <div class="fw-bold small text-main">{{ notif.title }}</div>
+                                    <div class="text-muted small text-truncate" style="max-width: 240px; font-size: 11px;">{{ notif.message }}</div>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="dropdown-header text-center small text-muted py-3">No new notifications</li>
+                        {% endfor %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <div class="d-flex justify-content-between px-3 py-1">
+                                <a class="small text-indigo fw-semibold text-decoration-none" href="{{ url_for('notifications.list_notifications') }}">Inbox</a>
+                                {% if unread_count > 0 %}
+                                    <form method="POST" action="{{ url_for('notifications.clear_all_notifications_route') }}" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-link p-0 small text-muted text-decoration-none" style="font-size: 12px;">Clear All</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Profile User Dropdown -->
+                <div class="dropdown">
+                    <button class="btn profile-dropdown-btn d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="profile-avatar text-white fw-bold">
+                            {{ current_user.first_name[0] if current_user.first_name else 'U' }}
+                        </div>
+                        <span class="d-none d-lg-inline fw-medium">{{ current_user.first_name }}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end py-2">
+                        <li class="px-3 py-2">
+                            <div class="fw-bold">{{ current_user.first_name }} {{ current_user.last_name }}</div>
+                            <div class="text-muted small">{{ current_user.email }}</div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-muted" href="{{ url_for('dashboard.index') }}" title="Coming soon"><i class="bi bi-person me-2"></i> My Profile</a></li>
+                        <li><a class="dropdown-item text-muted" href="{{ url_for('dashboard.index') }}" title="Coming soon"><i class="bi bi-gear me-2"></i> Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                                <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>

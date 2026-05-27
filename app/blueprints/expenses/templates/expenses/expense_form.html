@@ -1,0 +1,108 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Record Expense - Bhishmaa One{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('expenses.list_expenses') }}">Finance</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('expenses.list_expenses') }}">Expenses</a></li>
+<li class="breadcrumb-item active" aria-current="page">Record Expense</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main"><i class="bi bi-file-earmark-plus me-2"></i>Record Outgoing Expense</h2>
+        <p class="text-muted small mb-0">Record raw material supplier payments, utilities, rental costs, or salary payouts</p>
+    </div>
+    <div>
+        <a href="{{ url_for('expenses.list_expenses') }}" class="btn btn-light border rounded-3 px-3 fw-semibold">
+            <i class="bi bi-arrow-left me-1"></i> Back to Ledger
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-5">
+                <form method="POST" action="{{ url_for('expenses.create_expense_route') }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="category" class="form-label small fw-medium">Expense Category</label>
+                            {{ form.category(class="form-select rounded-3", id="categorySelect") }}
+                            <span class="text-danger small">{{ form.category.errors[0] if form.category.errors else '' }}</span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="amount" class="form-label small fw-medium">Expense Amount (₹)</label>
+                            {{ form.amount(class="form-control rounded-3", placeholder="0.00", min="0.01", step="0.01") }}
+                            <span class="text-danger small">{{ form.amount.errors[0] if form.amount.errors else '' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Supplier Selection Box -->
+                    <div class="mb-3 d-none" id="supplierSelectContainer">
+                        <label for="supplier_id" class="form-label small fw-medium">Select Supplier</label>
+                        {{ form.supplier_id(class="form-select rounded-3") }}
+                        <span class="text-danger small">{{ form.supplier_id.errors[0] if form.supplier_id.errors else '' }}</span>
+                        <div class="form-text text-muted small" style="font-size: 11px;">
+                            <i class="bi bi-info-circle me-1"></i> Selecting a supplier will **automatically reduce** their outstanding balance in CRM by this amount upon saving.
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="date" class="form-label small fw-medium">Expense Date</label>
+                            {{ form.date(class="form-control rounded-3", type="date") }}
+                            <span class="text-danger small">{{ form.date.errors[0] if form.date.errors else '' }}</span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="payment_mode" class="form-label small fw-medium">Payment Mode</label>
+                            {{ form.payment_mode(class="form-select rounded-3") }}
+                            <span class="text-danger small">{{ form.payment_mode.errors[0] if form.payment_mode.errors else '' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="status" class="form-label small fw-medium">Payment Status</label>
+                        {{ form.status(class="form-select rounded-3") }}
+                        <span class="text-danger small">{{ form.status.errors[0] if form.status.errors else '' }}</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="description" class="form-label small fw-medium">Description / Reference Details</label>
+                        {{ form.description(class="form-control rounded-3", rows="3", placeholder="e.g. Electric bill for May 2026, Invoice voucher ref...") }}
+                        <span class="text-danger small">{{ form.description.errors[0] if form.description.errors else '' }}</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-indigo rounded-3 w-100 py-3 fw-bold d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Save Expense Entry</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const categorySelect = document.getElementById("categorySelect");
+        const supplierSelectContainer = document.getElementById("supplierSelectContainer");
+        
+        function toggleSupplierSelect() {
+            if (categorySelect.value === "Supplier Payment") {
+                supplierSelectContainer.classList.remove("d-none");
+            } else {
+                supplierSelectContainer.classList.add("d-none");
+            }
+        }
+        
+        categorySelect.addEventListener("change", toggleSupplierSelect);
+        toggleSupplierSelect(); // Run initially
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,336 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Warehouse Transfers - Bhishmaa One{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('pos.billing') }}">POS</a></li>
+<li class="breadcrumb-item active" aria-current="page">Stock Transfers</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main"><i class="bi bi-arrow-left-right me-2 text-indigo"></i>Warehouse Transfers</h2>
+        <p class="text-muted small mb-0">Move stock between branches and authorize incoming inventory transfers</p>
+    </div>
+    <div>
+        <button type="button" class="btn btn-indigo rounded-3 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#newTransferModal">
+            <i class="bi bi-plus-lg"></i>
+            <span>Create Transfer Request</span>
+        </button>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-header bg-transparent border-0 px-4 pt-4">
+        <h5 class="fw-bold text-main mb-0">Transfer History</h5>
+    </div>
+    
+    <div class="card-body px-4 pb-4">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="border-0 rounded-start-3">Date</th>
+                        <th class="border-0">Direction</th>
+                        <th class="border-0">Source / Target</th>
+                        <th class="border-0">Items Details</th>
+                        <th class="border-0">Status</th>
+                        <th class="border-0 rounded-end-3 text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if transfers %}
+                        {% for transfer in transfers %}
+                        <tr>
+                            <td><span class="small font-monospace text-muted">{{ transfer.created_at.strftime('%d-%b-%Y %I:%M %p') }}</span></td>
+                            <td>
+                                {% if transfer.from_branch_id == current_branch_id %}
+                                    <span class="badge bg-danger-light text-danger rounded-pill"><i class="bi bi-arrow-up-right me-1"></i>Outgoing</span>
+                                {% else %}
+                                    <span class="badge bg-success-light text-success rounded-pill"><i class="bi bi-arrow-down-left me-1"></i>Incoming</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if transfer.from_branch_id == current_branch_id %}
+                                    <span class="fw-semibold">To: {{ transfer.to_branch.name }}</span>
+                                {% else %}
+                                    <span class="fw-semibold">From: {{ transfer.from_branch.name }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <ul class="list-unstyled mb-0 small">
+                                    {% for item in transfer.items %}
+                                        <li><i class="bi bi-box-seam text-muted me-1"></i>{{ item.product.name }}: <strong class="text-indigo">{{ item.quantity | int }} units</strong></li>
+                                    {% endfor %}
+                                </ul>
+                                {% if transfer.notes %}
+                                    <span class="text-muted small d-block mt-1"><em>Notes: {{ transfer.notes }}</em></span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if transfer.status == 'Pending' %}
+                                    <span class="badge bg-warning-light text-warning rounded-pill px-3 py-1.5 small">Pending</span>
+                                {% elif transfer.status == 'Approved' %}
+                                    <span class="badge bg-success-light text-success rounded-pill px-3 py-1.5 small">Approved</span>
+                                {% else %}
+                                    <span class="badge bg-danger-light text-danger rounded-pill px-3 py-1.5 small">Cancelled</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                {% if transfer.status == 'Pending' %}
+                                    {% if transfer.to_branch_id == current_branch_id %}
+                                        <!-- Incoming Transfer needs approval -->
+                                        <form method="POST" action="{{ url_for('pos.approve_transfer_route', transfer_id=transfer.id) }}" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-sm btn-success rounded-3 fw-bold px-3">
+                                                <i class="bi bi-check-lg me-1"></i>Approve
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ url_for('pos.cancel_transfer_route', transfer_id=transfer.id) }}" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-sm btn-light border rounded-3 fw-semibold px-2 ms-1">Reject</button>
+                                        </form>
+                                    {% else %}
+                                        <!-- Outgoing Transfer can be cancelled by sender -->
+                                        <form method="POST" action="{{ url_for('pos.cancel_transfer_route', transfer_id=transfer.id) }}" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-sm btn-light-danger rounded-3 fw-semibold px-3">
+                                                <i class="bi bi-x-circle me-1"></i>Cancel Request
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted small">Processed</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-arrow-left-right fs-1 mb-2 d-block opacity-25"></i>
+                                <span>No transfer requests logged yet. Create one using the button above.</span>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- New Transfer Modal -->
+<div class="modal fade" id="newTransferModal" tabindex="-1" aria-labelledby="newTransferModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header border-0 px-4 pt-4 pb-0">
+                <h5 class="modal-title fw-bold text-main" id="newTransferModalLabel"><i class="bi bi-send me-2 text-indigo"></i>New Inter-Branch Transfer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body p-4">
+                <form id="transferForm">
+                    <input type="hidden" name="csrf_token" id="csrfToken" value="{{ csrf_token() }}">
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="to_branch_id" class="form-label small fw-semibold text-muted">Target Destination Branch</label>
+                            {{ form.to_branch_id(class="form-select rounded-3", id="toBranchSelect") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="transfer_notes" class="form-label small fw-semibold text-muted">Notes / Reason (Optional)</label>
+                            {{ form.notes(class="form-control rounded-3", id="transferNotes", rows="1", placeholder="e.g. Out of stock at counter") }}
+                        </div>
+                    </div>
+
+                    <hr class="border-dashed my-4">
+                    
+                    <h6 class="fw-bold text-main mb-3">Add Products to Transfer</h6>
+                    <div class="row g-2 align-items-end mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-muted mb-1">Select Product</label>
+                            <select class="form-select rounded-3" id="transferProductSelect">
+                                <option value="" selected disabled>Choose a product...</option>
+                                {% for p in products %}
+                                    <option value="{{ p.id }}" data-name="{{ p.name }}" data-stock="{{ p.branch_stock_level }}">{{ p.name }} (Avail: {{ p.branch_stock_level | int }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-muted mb-1">Transfer Qty</label>
+                            <input type="number" id="transferProductQty" class="form-control rounded-3" value="1" min="1" step="1">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-indigo rounded-3 w-100 fw-bold" id="btnAddToTransfer">Add</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive my-3">
+                        <table class="table align-middle" id="transferTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="border-0 rounded-start-3">Product</th>
+                                    <th class="border-0">Transfer Qty</th>
+                                    <th class="border-0 rounded-end-3 text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transferItemsList">
+                                <tr id="emptyTransferRow">
+                                    <td colspan="3" class="text-center py-4 text-muted small">No items added to transfer list.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="modal-footer border-0 px-0 pb-0 pt-3">
+                        <button type="button" class="btn btn-light rounded-3 fw-semibold px-4" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-indigo rounded-3 fw-bold px-4">Submit Transfer Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let transferItems = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const productSelect = document.getElementById('transferProductSelect');
+        const qtyInput = document.getElementById('transferProductQty');
+        const btnAdd = document.getElementById('btnAddToTransfer');
+        const itemsList = document.getElementById('transferItemsList');
+        const emptyRow = document.getElementById('emptyTransferRow');
+        const form = document.getElementById('transferForm');
+
+        if (btnAdd) {
+            btnAdd.addEventListener('click', () => {
+                const opt = productSelect.options[productSelect.selectedIndex];
+                if (!opt || opt.value === "") {
+                    alert("Please select a product.");
+                    return;
+                }
+
+                const productId = opt.value;
+                const productName = opt.getAttribute('data-name');
+                const stock = parseFloat(opt.getAttribute('data-stock') || '0');
+                const qty = parseInt(qtyInput.value || '0');
+
+                if (qty <= 0) {
+                    alert("Quantity must be greater than zero.");
+                    return;
+                }
+                if (qty > stock) {
+                    alert(`Insufficient stock. You only have ${stock} units of '${productName}' available.`);
+                    return;
+                }
+
+                const existing = transferItems.find(item => item.product_id === productId);
+                if (existing) {
+                    if (existing.quantity + qty > stock) {
+                        alert(`Insufficient stock. Total transfer request (${existing.quantity + qty}) exceeds available stock (${stock}).`);
+                        return;
+                    }
+                    existing.quantity += qty;
+                } else {
+                    transferItems.push({
+                        product_id: productId,
+                        product_name: productName,
+                        quantity: qty
+                    });
+                }
+
+                renderTransferList();
+                productSelect.selectedIndex = 0;
+                qtyInput.value = 1;
+            });
+        }
+
+        function renderTransferList() {
+            // Clear dynamic rows
+            const rows = itemsList.querySelectorAll('.transfer-row-item');
+            rows.forEach(r => r.remove());
+
+            if (transferItems.length === 0) {
+                emptyRow.classList.remove('d-none');
+                return;
+            }
+
+            emptyRow.classList.add('d-none');
+
+            transferItems.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'transfer-row-item';
+                tr.innerHTML = `
+                    <td class="fw-semibold text-main">${item.product_name}</td>
+                    <td class="fw-bold text-indigo">${item.quantity}</td>
+                    <td class="text-end">
+                        <button type="button" class="btn btn-sm btn-icon btn-light rounded-circle text-danger btn-remove-transfer-item" data-index="${index}">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </td>
+                `;
+                itemsList.appendChild(tr);
+            });
+
+            // Listeners to remove
+            itemsList.querySelectorAll('.btn-remove-transfer-item').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = parseInt(btn.getAttribute('data-index'));
+                    transferItems.splice(idx, 1);
+                    renderTransferList();
+                });
+            });
+        }
+
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                if (transferItems.length === 0) {
+                    alert("Please add at least one item to transfer.");
+                    return;
+                }
+
+                const toBranchId = document.getElementById('toBranchSelect').value;
+                const notes = document.getElementById('transferNotes').value;
+                const csrfToken = document.getElementById('csrfToken').value;
+
+                const payload = {
+                    to_branch_id: toBranchId,
+                    notes: notes,
+                    items: transferItems.map(item => ({
+                        product_id: item.product_id,
+                        quantity: item.quantity
+                    }))
+                };
+
+                fetch("{{ url_for('pos.api_create_transfer') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        return res.json().then(err => { throw new Error(err.error || "Failed to create transfer") });
+                    }
+                    return res.json();
+                })
+                .then(res => {
+                    alert(res.message);
+                    location.reload();
+                })
+                .catch(err => {
+                    alert(`Transfer Error: ${err.message}`);
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

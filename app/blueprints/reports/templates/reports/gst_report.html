@@ -1,0 +1,135 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}GST & GSTR-1 Audit - Bhishmaa One{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('reports.dashboard') }}">Reports</a></li>
+<li class="breadcrumb-item active" aria-current="page">GSTR-1 Schedules</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main"><i class="bi bi-file-earmark-ruled me-2"></i>GST Tax Compliance Summary</h2>
+        <p class="text-muted small mb-0 font-monospace">Interval: {{ start_date }} to {{ end_date }}</p>
+    </div>
+    <div>
+        <a href="{{ url_for('reports.dashboard') }}" class="btn btn-light border rounded-3 px-3 fw-semibold">
+            <i class="bi bi-arrow-left me-1"></i> Back to Hub
+        </a>
+    </div>
+</div>
+
+<!-- Date Picker -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-3">
+        <form method="GET" action="{{ url_for('reports.gst_report') }}" class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <label class="form-label small fw-medium">From Date</label>
+                <input type="date" name="start_date" class="form-control rounded-3" value="{{ start_date }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-medium">To Date</label>
+                <input type="date" name="end_date" class="form-control rounded-3" value="{{ end_date }}">
+            </div>
+            <div class="col-md-3 mt-md-4 pt-md-2">
+                <button type="submit" class="btn btn-indigo rounded-3 w-100 fw-semibold">Apply Interval</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- B2B Schedule (sales to registered taxpayers) -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-header bg-transparent border-0 px-4 pt-4">
+        <h5 class="fw-bold text-main mb-0"><i class="bi bi-building me-1 text-indigo"></i>B2B Sales (Registered Clients)</h5>
+        <p class="text-muted small mb-0">Sales transactions where customer GSTIN is recorded</p>
+    </div>
+    <div class="card-body px-4 pb-4">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="border-0 rounded-start-3">Client GSTIN</th>
+                        <th class="border-0">Place of Supply (State)</th>
+                        <th class="border-0">GST Rate (%)</th>
+                        <th class="border-0">Taxable Value</th>
+                        <th class="border-0">CGST Amount</th>
+                        <th class="border-0">SGST Amount</th>
+                        <th class="border-0">IGST Amount</th>
+                        <th class="border-0 rounded-end-3 text-end">Total Tax</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if b2b %}
+                        {% for row in b2b %}
+                            <tr>
+                                <td class="fw-bold font-monospace text-main">{{ row.gstin }}</td>
+                                <td class="text-main fw-medium">State: {{ row.state_code }}</td>
+                                <td class="text-main font-monospace">{{ row.gst_rate }}%</td>
+                                <td>₹ {{ "{:,.2f}".format(row.taxable_value) }}</td>
+                                <td class="text-muted small">₹ {{ "{:,.2f}".format(row.cgst) }}</td>
+                                <td class="text-muted small">₹ {{ "{:,.2f}".format(row.sgst) }}</td>
+                                <td class="text-muted small">₹ {{ "{:,.2f}".format(row.igst) }}</td>
+                                <td class="fw-bold text-indigo text-end">₹ {{ "{:,.2f}".format(row.total_tax) }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                <span>No B2B sales registered in this date range.</span>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- B2C Schedule (sales to unregistered consumer) -->
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-transparent border-0 px-4 pt-4">
+        <h5 class="fw-bold text-main mb-0"><i class="bi bi-person me-1 text-success"></i>B2C Sales (Retail Consumers)</h5>
+        <p class="text-muted small mb-0">Sales transactions made to end consumers without GSTIN</p>
+    </div>
+    <div class="card-body px-4 pb-4">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="border-0 rounded-start-3">Place of Supply (State)</th>
+                        <th class="border-0">GST Rate (%)</th>
+                        <th class="border-0">Taxable Value</th>
+                        <th class="border-0">CGST Amount</th>
+                        <th class="border-0">SGST Amount</th>
+                        <th class="border-0">IGST Amount</th>
+                        <th class="border-0 rounded-end-3 text-end">Total Tax</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if b2c %}
+                        {% for row in b2c %}
+                            <tr>
+                                <td class="text-main fw-medium">State: {{ row.state_code }}</td>
+                                <td class="text-main font-monospace">{{ row.gst_rate }}%</td>
+                                <td>₹ {{ "{:,.2f}".format(row.taxable_value) }}</td>
+                                <td class="text-muted small">₹ {{ "{:,.2f}".format(row.cgst) }}</td>
+                                <td class="text-muted small">₹ {{ "{:,.2f}".format(row.sgst) }}</td>
+                                <td class="text-muted small">₹ {{ "{:,.2f}".format(row.igst) }}</td>
+                                <td class="fw-bold text-success text-end">₹ {{ "{:,.2f}".format(row.total_tax) }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <span>No B2C sales registered in this date range.</span>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

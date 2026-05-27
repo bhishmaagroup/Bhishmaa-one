@@ -1,0 +1,132 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Roster Attendance - Bhishmaa One{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('hrm.static', filename='css/hrm.css') }}">
+{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('hrm.list_attendance') }}">HRMS</a></li>
+<li class="breadcrumb-item active" aria-current="page">Staff Attendance</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main"><i class="bi bi-calendar2-check me-2"></i>Staff Attendance</h2>
+        <p class="text-muted small mb-0">Record and monitor daily roster attendance logs</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <form method="GET" action="{{ url_for('hrm.list_attendance') }}" class="d-flex align-items-center gap-2">
+            <label class="small fw-semibold text-muted text-nowrap me-1">Select Date:</label>
+            <input type="date" name="date" class="form-control rounded-3" value="{{ target_date_str }}" onchange="this.form.submit()">
+        </form>
+        <a href="{{ url_for('hrm.list_payroll') }}" class="btn btn-indigo rounded-3 px-3 fw-semibold">
+            <i class="bi bi-cash-stack me-1"></i> Payroll Ledger
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-transparent border-0 px-4 pt-4 pb-0">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-main mb-0">Daily Roster Sheet — {{ target_date.strftime('%B %d, %Y') }}</h5>
+            <span class="badge bg-indigo-light text-indigo px-3 py-2 rounded-pill small">Active Staff Count: {{ staff_list|length }}</span>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table align-middle" id="attendanceTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="border-0 rounded-start-3">Employee Name</th>
+                        <th class="border-0">Username / Role</th>
+                        <th class="border-0">Department</th>
+                        <th class="border-0">Daily Attendance Status</th>
+                        <th class="border-0">Status Indicators</th>
+                        <th class="border-0 rounded-end-3 text-end">Action Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if staff_list %}
+                        {% for staff in staff_list %}
+                            {% set record = records_map.get(staff.id) %}
+                            <tr data-user-id="{{ staff.id }}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle-sm bg-light text-indigo fw-bold rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                            {{ (staff.first_name or staff.username)[0]|upper }}
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-semibold text-main mb-0">{{ staff.first_name or '' }} {{ staff.last_name or '' }}</h6>
+                                            <span class="text-muted small font-monospace">#{{ staff.id[:8] }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-main fw-medium">@{{ staff.username }}</div>
+                                    <span class="badge bg-light border text-muted font-monospace small" style="font-size: 10px;">
+                                        {{ staff.detail.designation if (staff.detail and staff.detail.designation) else 'Staff' }}
+                                    </span>
+                                </td>
+                                <td class="text-muted small">
+                                    {{ staff.detail.department if (staff.detail and staff.detail.department) else 'Operations' }}
+                                </td>
+                                <td>
+                                    <select class="form-select form-select-sm rounded-3 status-select" style="width: 140px;" data-user-id="{{ staff.id }}" data-date="{{ target_date_str }}">
+                                        <option value="Present" {% if record and record.status == 'Present' %}selected{% endif %}>Present</option>
+                                        <option value="Absent" {% if record and record.status == 'Absent' %}selected{% endif %}>Absent</option>
+                                        <option value="Half-Day" {% if record and record.status == 'Half-Day' %}selected{% endif %}>Half-Day</option>
+                                        <option value="Late" {% if record and record.status == 'Late' %}selected{% endif %}>Late</option>
+                                        <option value="On-Leave" {% if record and record.status == 'On-Leave' %}selected{% endif %}>On-Leave</option>
+                                        <option value="" {% if not record %}selected{% endif %} disabled>-- Unlogged --</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="badge-indicator-container">
+                                        {% if record %}
+                                            {% if record.status == 'Present' %}
+                                                <span class="badge bg-success-light text-success rounded-pill px-2.5">Present</span>
+                                            {% elif record.status == 'Absent' %}
+                                                <span class="badge bg-danger-light text-danger rounded-pill px-2.5">Absent</span>
+                                            {% elif record.status == 'Half-Day' %}
+                                                <span class="badge bg-warning-light text-warning rounded-pill px-2.5">Half-Day</span>
+                                            {% elif record.status == 'Late' %}
+                                                <span class="badge bg-orange-light text-orange rounded-pill px-2.5">Late Arrival</span>
+                                            {% elif record.status == 'On-Leave' %}
+                                                <span class="badge bg-info-light text-info rounded-pill px-2.5">On Leave</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-light text-muted border rounded-pill px-2.5">Not Logged</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    <span class="status-msg text-success small fw-medium d-none"><i class="bi bi-check-circle-fill me-1"></i>Saved</span>
+                                    <span class="loader-spinner spinner-border spinner-border-sm text-indigo d-none" role="status"></span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-people fs-1 mb-2 d-block"></i>
+                                <span>No staff users registered in your organization tenant yet.</span>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const QUICK_LOG_URL = "{{ url_for('hrm.api_quick_attendance') }}";
+    const CSRF_TOKEN = "{{ csrf_token() }}";
+</script>
+<script src="{{ url_for('hrm.static', filename='js/hrm.js') }}"></script>
+{% endblock %}

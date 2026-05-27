@@ -1,0 +1,151 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Generate Payslip - Bhishmaa One{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('hrm.list_attendance') }}">HRMS</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('hrm.list_payroll') }}">Payroll</a></li>
+<li class="breadcrumb-item active" aria-current="page">Generate Payslip</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main"><i class="bi bi-file-earmark-plus me-2"></i>Generate Salary Payslip</h2>
+        <p class="text-muted small mb-0">Compile monthly attendance and basic salary components to draft employee slip</p>
+    </div>
+    <div>
+        <a href="{{ url_for('hrm.list_payroll') }}" class="btn btn-light border rounded-3 px-3 fw-semibold">
+            <i class="bi bi-arrow-left me-1"></i> Back to Ledger
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Parameters Entry Form -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <form id="payrollForm" method="POST" action="{{ url_for('hrm.generate_payroll_route') }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="user_id" class="form-label small fw-medium">Select Employee</label>
+                        {{ form.user_id(class="form-select rounded-3", id="userIdSelect") }}
+                        <span class="text-danger small">{{ form.user_id.errors[0] if form.user_id.errors else '' }}</span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="month" class="form-label small fw-medium">Payroll Month</label>
+                            {{ form.month(class="form-select rounded-3", id="monthSelect") }}
+                            <span class="text-danger small">{{ form.month.errors[0] if form.month.errors else '' }}</span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="year" class="form-label small fw-medium">Payroll Year</label>
+                            {{ form.year(class="form-select rounded-3", id="yearSelect") }}
+                            <span class="text-danger small">{{ form.year.errors[0] if form.year.errors else '' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="row border-top pt-3 mt-3">
+                        <h6 class="fw-bold text-main mb-3"><i class="bi bi-cash me-1 text-indigo"></i>Financial Corrections</h6>
+                        <div class="col-md-6 mb-3">
+                            <label for="allowances" class="form-label small fw-medium">Add Bonuses / Travel Allowances (₹)</label>
+                            {{ form.allowances(class="form-control rounded-3", id="allowancesInput", placeholder="0.00") }}
+                            <span class="text-danger small">{{ form.allowances.errors[0] if form.allowances.errors else '' }}</span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="deductions" class="form-label small fw-medium">Deductions / Penalties / Tax (₹)</label>
+                            {{ form.deductions(class="form-control rounded-3", id="deductionsInput", placeholder="0.00") }}
+                            <span class="text-danger small">{{ form.deductions.errors[0] if form.deductions.errors else '' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button type="submit" class="btn btn-indigo rounded-3 w-100 py-3 fw-bold mt-3 d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-shield-lock-fill"></i>
+                        <span>Generate Draft Payslip</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Live Payroll Context Preview Card -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 bg-light border">
+            <div class="card-header bg-transparent border-0 px-4 pt-4 pb-0">
+                <h5 class="fw-bold text-main mb-0">Live Calculations Preview</h5>
+            </div>
+            <div class="card-body p-4">
+                <div id="previewSpinner" class="text-center py-5 d-none">
+                    <div class="spinner-border text-indigo" role="status"></div>
+                    <p class="text-muted small mt-2 mb-0">Gathering staff details and attendance summaries...</p>
+                </div>
+                
+                <div id="previewData">
+                    <div class="text-center text-muted py-5" id="previewEmptyState">
+                        <i class="bi bi-calculator fs-1 mb-2 d-block"></i>
+                        <span>Select staff member and timeframe to load calculations.</span>
+                    </div>
+
+                    <div id="previewContent" class="d-none">
+                        <div class="p-3 bg-white rounded-3 mb-3 border">
+                            <h6 class="fw-bold text-main small uppercase tracking-wider mb-2">Staff Roster Metrics</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">Present Days:</span>
+                                <span class="fw-semibold text-success small" id="previewPresent">0.0</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">Absent Days (LOP):</span>
+                                <span class="fw-semibold text-danger small" id="previewAbsent">0.0</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">On-Leave Days:</span>
+                                <span class="fw-semibold text-info small" id="previewLeave">0.0</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted small">Late Counts:</span>
+                                <span class="fw-semibold text-warning small" id="previewLate">0</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-white rounded-3 border">
+                            <h6 class="fw-bold text-main small uppercase tracking-wider mb-2">Calculated Payout Splits</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">Basic Monthly Salary:</span>
+                                <span class="fw-semibold text-main small" id="previewBasic">₹ 0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">Added Corrections / Bonuses:</span>
+                                <span class="fw-semibold text-success small" id="previewAdditions">₹ 0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">Unpaid Leave Deductions (LOP):</span>
+                                <span class="fw-semibold text-danger small" id="previewLopDeductions">₹ 0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">Added Manual Deductions:</span>
+                                <span class="fw-semibold text-danger small" id="previewManualDeductions">₹ 0.00</span>
+                            </div>
+                            <hr class="my-2 border-dashed">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-main">Estimated Net Payout:</span>
+                                <span class="fs-4 fw-black text-indigo" id="previewNetPay">₹ 0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const PREVIEW_API_URL = "{{ url_for('hrm.api_payroll_preview') }}";
+</script>
+<script src="{{ url_for('hrm.static', filename='js/hrm_form.js') }}"></script>
+{% endblock %}

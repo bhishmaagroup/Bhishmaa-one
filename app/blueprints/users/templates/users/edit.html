@@ -1,0 +1,116 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Edit Staff Profile - Bhishmaa One{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('users.list_users') }}">Users</a></li>
+<li class="breadcrumb-item active" aria-current="page">Edit Staff</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-lg-10">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-transparent border-0 px-4 pt-4">
+                <h5 class="fw-bold mb-1 text-main">Edit Staff Profile: {{ user.first_name }}</h5>
+                <p class="text-muted small mb-0">Modify employee specifications, payroll levels, and access roles</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="section-divider-title mb-3">Identity Profiles</div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label fw-medium small">First Name</label>
+                            {{ form.first_name(class="form-control rounded-3", placeholder="Enter first name") }}
+                            {% for error in form.first_name.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label fw-medium small">Last Name</label>
+                            {{ form.last_name(class="form-control rounded-3", placeholder="Enter last name") }}
+                            {% for error in form.last_name.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label fw-medium small">Email Address</label>
+                            {{ form.email(class="form-control rounded-3", placeholder="staff@business.com") }}
+                            {% for error in form.email.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label fw-medium small">Phone Number</label>
+                            {{ form.phone(class="form-control rounded-3", placeholder="Enter phone number") }}
+                            {% for error in form.phone.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="roles" class="form-label fw-medium small">Assign Roles (RBAC)</label>
+                            {{ form.roles(class="form-select rounded-3", multiple=True) }}
+                            {% for error in form.roles.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6 mb-3 d-flex align-items-center">
+                            <div class="form-check mt-3">
+                                {{ form.is_active(class="form-check-input", id="is_active") }}
+                                <label class="form-check-label fw-medium text-main" for="is_active">Enable Staff Login Access</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider-title my-3">Designation & Payroll Settings</div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="designation" class="form-label fw-medium small">Designation</label>
+                            {{ form.designation(class="form-select rounded-3") }}
+                            {% for error in form.designation.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="department" class="form-label fw-medium small">Department</label>
+                            {{ form.department(class="form-select rounded-3") }}
+                            {% for error in form.department.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="basic_salary" class="form-label fw-medium small">Basic Monthly Salary (₹)</label>
+                            {{ form.basic_salary(class="form-control rounded-3") }}
+                            {% for error in form.basic_salary.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="address" class="form-label fw-medium small">Residential Address</label>
+                        {{ form.address(class="form-control rounded-3", rows="3") }}
+                        {% for error in form.address.errors %}
+                            <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{{ url_for('users.list_users') }}" class="btn btn-light rounded-3 px-4 border fw-semibold">Cancel</a>
+                        {{ form.submit(class="btn btn-indigo rounded-3 px-4 fw-semibold") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

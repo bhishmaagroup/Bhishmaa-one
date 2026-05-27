@@ -1,0 +1,592 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Subscription Plan - Bhishmaa One{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('organizations.profile') }}">Organizations</a></li>
+<li class="breadcrumb-item active" aria-current="page">Subscription Plan</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4 mt-3">
+    <!-- Navigation Sidebar Profile Links -->
+    <div class="col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-3">
+                <div class="nav flex-column nav-pills gap-1">
+                    <a class="nav-link rounded-3 py-2 px-3 fw-semibold text-main" href="{{ url_for('organizations.profile') }}">
+                        <i class="bi bi-building me-2"></i> Business Profile
+                    </a>
+                    <a class="nav-link rounded-3 py-2 px-3 fw-semibold text-main" href="{{ url_for('organizations.billing_settings') }}">
+                        <i class="bi bi-receipt me-2"></i> GST & Billing Settings
+                    </a>
+                    <a class="nav-link active rounded-3 py-2 px-3 fw-semibold" href="{{ url_for('organizations.subscription') }}">
+                        <i class="bi bi-shield-lock me-2"></i> Subscription Plan
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Panel Form -->
+    <div class="col-lg-9">
+        <!-- Plan Limits Usage Cards -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-transparent border-0 px-4 pt-4">
+                <h5 class="fw-bold mb-1 text-main">Active Subscription: {{ org.plan_name }}</h5>
+                <p class="text-muted small mb-0">Monitor your billing plan usage limits</p>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <!-- Staff usage indicator -->
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <span class="text-uppercase fw-bold text-muted small">Registered Staff</span>
+                            <h4 class="fw-bold mt-2 mb-1">{{ usage.staff_count }} / {{ usage.staff_limit if usage.staff_limit else 'Unlimited' }}</h4>
+                            <div class="progress mt-2" style="height: 6px;">
+                                {% set staff_pct = (usage.staff_count / usage.staff_limit * 100) if usage.staff_limit else 0 %}
+                                <div class="progress-bar bg-indigo" role="progressbar" style="width: {{ staff_pct }}%" aria-valuenow="{{ staff_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Invoices usage indicator -->
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <span class="text-uppercase fw-bold text-muted small">Monthly Invoices</span>
+                            <h4 class="fw-bold mt-2 mb-1">{{ usage.invoices_count }} / {{ usage.invoices_limit if usage.invoices_limit else 'Unlimited' }}</h4>
+                            <div class="progress mt-2" style="height: 6px;">
+                                {% set inv_pct = (usage.invoices_count / usage.invoices_limit * 100) if usage.invoices_limit else 0 %}
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ inv_pct }}%" aria-valuenow="{{ inv_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products usage indicator -->
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <span class="text-uppercase fw-bold text-muted small">Catalog Products</span>
+                            <h4 class="fw-bold mt-2 mb-1">{{ usage.products_count }} / {{ usage.products_limit if usage.products_limit else 'Unlimited' }}</h4>
+                            <div class="progress mt-2" style="height: 6px;">
+                                {% set prod_pct = (usage.products_count / usage.products_limit * 100) if usage.products_limit else 0 %}
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ prod_pct }}%" aria-valuenow="{{ prod_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Billing Cycle Toggle -->
+        <div class="d-flex justify-content-center align-items-center gap-3 mb-4 mt-2">
+            <span class="fw-semibold text-muted" id="billing-monthly-lbl">Monthly Billing</span>
+            <div class="form-check form-switch custom-switch mb-0">
+                <input class="form-check-input" type="checkbox" role="switch" id="billingCycleToggle" style="width: 3.2em; height: 1.6em; cursor: pointer;">
+            </div>
+            <span class="fw-semibold text-main d-flex align-items-center gap-2" id="billing-yearly-lbl">
+                Yearly Billing <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill font-monospace fw-bold" style="font-size: 0.7rem;">Save 20%</span>
+            </span>
+        </div>
+
+        <!-- Upgrade/Plan Selection Grid -->
+        <div class="row g-4 mb-5">
+            <!-- Free Plan -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 border border-light-subtle shadow-sm rounded-4 transition-card {% if org.plan_name == 'Free' %}border-indigo border-2{% endif %}" style="transition: all 0.3s ease;">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="mb-3">
+                            <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-1 fw-bold small text-uppercase">Free Tier</span>
+                        </div>
+                        <h4 class="fw-extrabold text-main mb-1">Free</h4>
+                        <p class="text-muted small mb-4" style="height: 36px;">For micro businesses starting out</p>
+                        
+                        <div class="mb-4">
+                            <h2 class="fw-bold mb-0 text-main">₹0</h2>
+                            <span class="text-muted small">always free</span>
+                        </div>
+
+                        {% if org.plan_name == 'Free' %}
+                            <button class="btn btn-outline-secondary w-100 rounded-3 py-2 fw-semibold mb-4" disabled>
+                                <i class="bi bi-patch-check-fill me-2"></i>Active Plan
+                            </button>
+                        {% else %}
+                            <button class="btn btn-indigo w-100 rounded-3 py-2 fw-semibold mb-4 btn-select-plan" data-plan="Free">
+                                Switch to Free
+                            </button>
+                        {% endif %}
+
+                        <hr class="my-3 opacity-10">
+
+                        <ul class="list-unstyled mb-0 flex-grow-1 small text-muted">
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>2</strong> Staff Members</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>50</strong> Invoices / Mo</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>20</strong> Products Catalog</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>POS Billing</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Reports (Lite)</li>
+                            <li class="mb-2 text-decoration-line-through opacity-50"><i class="bi bi-x-circle-fill text-danger me-2"></i>Inventory Manager</li>
+                            <li class="mb-2 text-decoration-line-through opacity-50"><i class="bi bi-x-circle-fill text-danger me-2"></i>Expenses Tracker</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Starter Plan -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 border border-light-subtle shadow-sm rounded-4 transition-card {% if org.plan_name == 'Starter' %}border-indigo border-2{% endif %}" style="transition: all 0.3s ease;">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="mb-3">
+                            <span class="badge bg-indigo-subtle text-indigo rounded-pill px-3 py-1 fw-bold small text-uppercase">Growth</span>
+                        </div>
+                        <h4 class="fw-extrabold text-main mb-1">Starter</h4>
+                        <p class="text-muted small mb-4" style="height: 36px;">Perfect for single stores & small outlets</p>
+                        
+                        <div class="mb-4">
+                            <h2 class="fw-bold mb-0 text-main">
+                                ₹<span class="plan-price" data-monthly="999" data-yearly="9590">999</span>
+                            </h2>
+                            <span class="text-muted small price-suffix">/ month</span>
+                        </div>
+
+                        {% if org.plan_name == 'Starter' %}
+                            <button class="btn btn-outline-secondary w-100 rounded-3 py-2 fw-semibold mb-4" disabled>
+                                <i class="bi bi-patch-check-fill me-2"></i>Active Plan
+                            </button>
+                        {% else %}
+                            <button class="btn btn-indigo w-100 rounded-3 py-2 fw-semibold mb-4 btn-select-plan" data-plan="Starter">
+                                Upgrade Plan
+                            </button>
+                        {% endif %}
+
+                        <hr class="my-3 opacity-10">
+
+                        <ul class="list-unstyled mb-0 flex-grow-1 small text-muted">
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>5</strong> Staff Members</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>250</strong> Invoices / Mo</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>100</strong> Products Catalog</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>POS Billing</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Inventory Manager</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Expenses Tracker</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Reports (Lite)</li>
+                            <li class="mb-2 text-decoration-line-through opacity-50"><i class="bi bi-x-circle-fill text-danger me-2"></i>CRM & Suppliers</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Plan (Most Popular Highlighted) -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 border-2 shadow rounded-4 transition-card position-relative {% if org.plan_name == 'Business' %}border-indigo{% else %}border-primary{% endif %}" style="transition: all 0.3s ease;">
+                    <div class="position-absolute top-0 start-50 translate-middle-x">
+                        <span class="badge bg-primary text-white rounded-pill px-3 py-1 fw-bold text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.5px;">Most Popular</span>
+                    </div>
+                    <div class="card-body p-4 d-flex flex-column mt-2">
+                        <div class="mb-3">
+                            <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1 fw-bold small text-uppercase">Scale</span>
+                        </div>
+                        <h4 class="fw-extrabold text-main mb-1">Business</h4>
+                        <p class="text-muted small mb-4" style="height: 36px;">Multi-user suite for established businesses</p>
+                        
+                        <div class="mb-4">
+                            <h2 class="fw-bold mb-0 text-main">
+                                ₹<span class="plan-price" data-monthly="2999" data-yearly="28790">2,999</span>
+                            </h2>
+                            <span class="text-muted small price-suffix">/ month</span>
+                        </div>
+
+                        {% if org.plan_name == 'Business' %}
+                            <button class="btn btn-outline-secondary w-100 rounded-3 py-2 fw-semibold mb-4" disabled>
+                                <i class="bi bi-patch-check-fill me-2"></i>Active Plan
+                            </button>
+                        {% else %}
+                            <button class="btn btn-primary w-100 rounded-3 py-2 fw-semibold mb-4 btn-select-plan" data-plan="Business">
+                                Upgrade Plan
+                            </button>
+                        {% endif %}
+
+                        <hr class="my-3 opacity-10">
+
+                        <ul class="list-unstyled mb-0 flex-grow-1 small text-muted">
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>20</strong> Staff Members</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>1,500</strong> Invoices / Mo</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>1,000</strong> Products</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>POS Billing & Inventory</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Customer CRM & Suppliers</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Expenses & Reports (Adv)</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>SMS & Email Notifications</li>
+                            <li class="mb-2 text-decoration-line-through opacity-50"><i class="bi bi-x-circle-fill text-danger me-2"></i>HRM & Payroll</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Premium Plan -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 border border-light-subtle shadow-sm rounded-4 transition-card {% if org.plan_name == 'Premium' %}border-indigo border-2{% endif %}" style="transition: all 0.3s ease;">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="mb-3">
+                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1 fw-bold small text-uppercase">Enterprise</span>
+                        </div>
+                        <h4 class="fw-extrabold text-main mb-1">Premium</h4>
+                        <p class="text-muted small mb-4" style="height: 36px;">Unbounded enterprise ERP tools</p>
+                        
+                        <div class="mb-4">
+                            <h2 class="fw-bold mb-0 text-main">
+                                ₹<span class="plan-price" data-monthly="5999" data-yearly="57590">5,999</span>
+                            </h2>
+                            <span class="text-muted small price-suffix">/ month</span>
+                        </div>
+
+                        {% if org.plan_name == 'Premium' %}
+                            <button class="btn btn-outline-secondary w-100 rounded-3 py-2 fw-semibold mb-4" disabled>
+                                <i class="bi bi-patch-check-fill me-2"></i>Active Plan
+                            </button>
+                        {% else %}
+                            <button class="btn btn-indigo w-100 rounded-3 py-2 fw-semibold mb-4 btn-select-plan" data-plan="Premium">
+                                Upgrade Plan
+                            </button>
+                        {% endif %}
+
+                        <hr class="my-3 opacity-10">
+
+                        <ul class="list-unstyled mb-0 flex-grow-1 small text-muted">
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Unlimited</strong> Staff Users</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Unlimited</strong> Invoices / Mo</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Unlimited</strong> Products</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>All Business Tier Features</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>HRM, Attendance & Payroll</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Developer API Access</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>AI Sales Forecasting</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Legacy Fallback Changer Form (hidden) -->
+<form id="legacyPlanForm" method="POST" action="" class="d-none">
+    {{ form.hidden_tag() }}
+</form>
+
+<!-- Simulated Sandbox Payment Gateway Modal -->
+<div class="modal fade" id="simulatedCheckoutModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="simulatedCheckoutLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="background-color: var(--color-bg-card); color: var(--color-text-main);">
+            <div class="modal-header border-bottom border-light-subtle py-3 px-4" style="background-color: rgba(79, 70, 229, 0.05);">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="brand-logo-icon bg-indigo text-white px-2 py-1 rounded" style="font-size: 0.85rem;"><i class="bi bi-shield-fill-check"></i></span>
+                    <h5 class="modal-title fw-bold text-indigo" id="simulatedCheckoutLabel">Bhishmaa One Sandbox Checkout</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="text-center mb-4">
+                    <i class="bi bi-credit-card-2-front text-indigo" style="font-size: 3rem;"></i>
+                    <h5 class="fw-bold mt-2 mb-0" id="sim-plan-display">Upgrade to Starter Plan</h5>
+                    <p class="text-muted small" id="sim-cycle-display">Billing: monthly</p>
+                </div>
+                
+                <div class="card bg-light border border-light-subtle rounded-3 p-3 mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Subscription Amount</span>
+                        <span class="fw-semibold" id="sim-amount-subtotal">₹999.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">GST (18% Integrated)</span>
+                        <span class="fw-semibold" id="sim-amount-gst">₹0.00 (Inclusive)</span>
+                    </div>
+                    <hr class="my-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-main">Total Chargeable</span>
+                        <span class="fw-bold fs-5 text-indigo" id="sim-amount-total">₹999.00</span>
+                    </div>
+                </div>
+
+                <div class="alert alert-info border-0 rounded-3 mb-0 small">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Developer Sandbox:</strong> No actual funds will be charged. Choose one of the responses below to verify webhook callback and state mutation rules.
+                </div>
+            </div>
+            <div class="modal-footer border-top border-light-subtle px-4 py-3 bg-light-subtle d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary rounded-3 px-3 py-2 fw-semibold btn-sim-cancel" data-bs-dismiss="modal">
+                    Cancel Checkout
+                </button>
+                <button type="button" class="btn btn-indigo rounded-3 px-4 py-2 fw-semibold btn-sim-success">
+                    <i class="bi bi-check-circle-fill me-2"></i>Pay Successfully
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .transition-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important;
+    }
+    .btn-indigo {
+        background-color: var(--color-primary);
+        color: white;
+    }
+    .btn-indigo:hover {
+        background-color: var(--color-primary-hover);
+        color: white;
+    }
+    .border-indigo {
+        border-color: var(--color-primary) !important;
+    }
+    .text-indigo {
+        color: var(--color-primary) !important;
+    }
+    .bg-indigo-subtle {
+        background-color: var(--color-primary-light) !important;
+    }
+    .text-indigo-subtle {
+        color: var(--color-primary) !important;
+    }
+    /* Switch design aesthetics */
+    .custom-switch .form-check-input {
+        background-color: var(--color-border);
+        border-color: var(--color-border);
+    }
+    .custom-switch .form-check-input:checked {
+        background-color: var(--color-primary);
+        border-color: var(--color-primary);
+    }
+    .custom-switch .form-check-input:focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Razorpay SDK -->
+<script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cycleToggle = document.getElementById('billingCycleToggle');
+    const planPrices = document.querySelectorAll('.plan-price');
+    const priceSuffixes = document.querySelectorAll('.price-suffix');
+    const labelMonthly = document.getElementById('billing-monthly-lbl');
+    const labelYearly = document.getElementById('billing-yearly-lbl');
+    
+    // State management
+    let billingCycle = 'monthly'; // 'monthly' or 'annually'
+    let checkoutContext = null; // Stores current active checkout details
+    
+    // Setup initial toggle state classes
+    function updateCycleLabels() {
+        if (billingCycle === 'monthly') {
+            labelMonthly.classList.remove('text-muted');
+            labelMonthly.classList.add('text-main');
+            labelYearly.classList.remove('text-main');
+            labelYearly.classList.add('text-muted');
+        } else {
+            labelMonthly.classList.remove('text-main');
+            labelMonthly.classList.add('text-muted');
+            labelYearly.classList.remove('text-muted');
+            labelYearly.classList.add('text-main');
+        }
+    }
+    updateCycleLabels();
+
+    // Toggle logic
+    cycleToggle.addEventListener('change', function() {
+        billingCycle = cycleToggle.checked ? 'annually' : 'monthly';
+        updateCycleLabels();
+        
+        planPrices.forEach(el => {
+            const price = el.getAttribute(`data-${billingCycle}`);
+            if (price) {
+                el.innerText = parseInt(price).toLocaleString('en-IN');
+            }
+        });
+        
+        priceSuffixes.forEach(el => {
+            el.innerText = billingCycle === 'annually' ? '/ year' : '/ month';
+        });
+    });
+
+    // Select Plan Buttons
+    const selectButtons = document.querySelectorAll('.btn-select-plan');
+    selectButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const planName = btn.getAttribute('data-plan');
+            
+            // If Free plan, we can bypass the payment simulator overlay and change plan directly
+            if (planName === 'Free') {
+                btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Switching...`;
+                btn.setAttribute('disabled', 'true');
+                
+                // Let's invoke the checkout endpoint
+                initiateCheckout(planName, 'monthly');
+                return;
+            }
+            
+            // For paid plans, show spinner and call checkout endpoint
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...`;
+            btn.setAttribute('disabled', 'true');
+            
+            initiateCheckout(planName, billingCycle, btn, originalHTML);
+        });
+    });
+
+    // Call checkout api
+    function initiateCheckout(planName, cycle, btnElement = null, originalBtnHTML = '') {
+        fetch("{{ url_for('organizations.checkout') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ form.csrf_token._value() if form.csrf_token else '' }}"
+            },
+            body: JSON.stringify({
+                plan_name: planName,
+                billing_cycle: cycle
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.error || 'Checkout failed') });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (btnElement) {
+                btnElement.innerHTML = originalBtnHTML;
+                btnElement.removeAttribute('disabled');
+            }
+            
+            // Handle Free Plan immediate success redirect
+            if (data.success && data.free_plan) {
+                window.location.reload();
+                return;
+            }
+            
+            checkoutContext = data;
+            
+            if (data.simulated) {
+                // Open Sandbox Simulator modal
+                openSimulatorModal(data);
+            } else {
+                // Open Razorpay Standard Checkout
+                openRazorpayCheckout(data);
+            }
+        })
+        .catch(err => {
+            if (btnElement) {
+                btnElement.innerHTML = originalBtnHTML;
+                btnElement.removeAttribute('disabled');
+            }
+            alert("Error: " + err.message);
+        });
+    }
+
+    // Opens Simulated modal
+    const simModalElement = document.getElementById('simulatedCheckoutModal');
+    const simModal = new bootstrap.Modal(simModalElement);
+    
+    function openSimulatorModal(data) {
+        document.getElementById('sim-plan-display').innerText = `Upgrade to ${data.plan_name} Plan`;
+        document.getElementById('sim-cycle-display').innerText = `Billing Cycle: ${data.billing_cycle}`;
+        
+        const price = (data.amount / 100).toFixed(2);
+        document.getElementById('sim-amount-subtotal').innerText = `₹${price}`;
+        document.getElementById('sim-amount-total').innerText = `₹${price}`;
+        
+        simModal.show();
+    }
+
+    // Handle Simulator Pay Button
+    document.querySelector('.btn-sim-success').addEventListener('click', function() {
+        const btn = this;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Simulating Payment...`;
+        btn.setAttribute('disabled', 'true');
+        
+        const paymentId = 'pay_sim_' + Math.random().toString(36).substring(2, 16);
+        const signature = 'sig_sim_' + Math.random().toString(36).substring(2, 16);
+        
+        submitCallback({
+            razorpay_payment_id: paymentId,
+            razorpay_order_id: checkoutContext.order_id,
+            razorpay_signature: signature,
+            plan_name: checkoutContext.plan_name,
+            billing_cycle: checkoutContext.billing_cycle
+        }, btn);
+    });
+
+    // Handle Standard Razorpay
+    function openRazorpayCheckout(data) {
+        var options = {
+            "key": data.key,
+            "amount": data.amount,
+            "currency": data.currency,
+            "name": data.name,
+            "description": data.description,
+            "order_id": data.order_id,
+            "handler": function (response) {
+                submitCallback({
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                    plan_name: data.plan_name,
+                    billing_cycle: data.billing_cycle
+                });
+            },
+            "prefill": {
+                "name": "{{ current_user.first_name }} {{ current_user.last_name }}",
+                "email": "{{ current_user.email }}"
+            },
+            "theme": {
+                "color": "#4f46e5"
+            }
+        };
+        var rzp = new Razorpay(options);
+        rzp.on('payment.failed', function (response){
+            alert("Payment failed: " + response.error.description);
+        });
+        rzp.open();
+    }
+
+    // Submit Callback details
+    function submitCallback(payload, btnElement = null) {
+        fetch("{{ url_for('organizations.callback') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ form.csrf_token._value() if form.csrf_token else '' }}"
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.error || 'Payment verification failed') });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (btnElement) {
+                btnElement.innerHTML = `<i class="bi bi-check-circle-fill me-2"></i>Paid Successfully`;
+                btnElement.removeAttribute('disabled');
+            }
+            simModal.hide();
+            // Reload page to reflect subscription changes
+            window.location.reload();
+        })
+        .catch(err => {
+            if (btnElement) {
+                btnElement.innerHTML = `<i class="bi bi-check-circle-fill me-2"></i>Pay Successfully`;
+                btnElement.removeAttribute('disabled');
+            }
+            alert("Payment verification error: " + err.message);
+        });
+    }
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,89 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Edit Role Permissions - Bhishmaa One{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('roles.list_roles') }}">Roles & Permissions</a></li>
+<li class="breadcrumb-item active" aria-current="page">Edit Role</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-lg-10">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-transparent border-0 px-4 pt-4">
+                <h5 class="fw-bold mb-1 text-main">Edit Role & Permissions</h5>
+                <p class="text-muted small mb-0">
+                    {% if is_system %}
+                        Configure permission matrix for standard system role: <strong>{{ role.name }}</strong>
+                    {% else %}
+                        Update custom role access settings
+                    {% endif %}
+                </p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="name" class="form-label fw-medium small">Role Name</label>
+                            {% if is_system %}
+                                {{ form.name(class="form-control rounded-3 bg-light text-muted", readonly=True) }}
+                                <span class="text-muted small mt-1 d-block"><i class="bi bi-info-circle me-1"></i>System role names cannot be renamed.</span>
+                            {% else %}
+                                {{ form.name(class="form-control rounded-3", placeholder="e.g. Sales Associate") }}
+                                {% for error in form.name.errors %}
+                                    <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-medium small">Description</label>
+                        {{ form.description(class="form-control rounded-3", rows="2", placeholder="Enter brief details of the scope of this role...") }}
+                        {% for error in form.description.errors %}
+                            <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="section-divider-title my-4">Permissions Access Matrix</div>
+                    
+                    {% for error in form.permissions.errors %}
+                        <span class="text-danger small mb-3 d-block">{{ error }}</span>
+                    {% endfor %}
+                    
+                    <div class="row">
+                        {% for subfield in form.permissions %}
+                            {% set label_parts = subfield.label.text.split(' - ') %}
+                            {% set perm_name = label_parts[0] %}
+                            {% set perm_desc = label_parts[1] if label_parts|length > 1 else '' %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 border rounded-3 p-3 bg-light-hover transition-all">
+                                    <div class="form-check d-flex align-items-start gap-2">
+                                        {{ subfield(class="form-check-input mt-1") }}
+                                        <div class="ms-1">
+                                            <label class="form-check-label fw-bold text-main small" for="{{ subfield.id }}">
+                                                {{ perm_name }}
+                                            </label>
+                                            <p class="text-muted mb-0 small mt-1" style="font-size: 0.8rem; line-height: 1.25;">
+                                                {{ perm_desc }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{{ url_for('roles.list_roles') }}" class="btn btn-light rounded-3 px-4 border fw-semibold">Cancel</a>
+                        {{ form.submit(class="btn btn-indigo rounded-3 px-4 fw-semibold") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

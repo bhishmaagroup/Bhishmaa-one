@@ -1,0 +1,57 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Stock History — {{ product.name }}{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('inventory.list_products') }}">Inventory</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('inventory.details', product_id=product.id) }}">Product Details</a></li>
+<li class="breadcrumb-item active" aria-current="page">Stock History</li>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4 mt-3 d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main">Stock History</h2>
+        <p class="text-muted small mb-0">Review all inventory adjustments and item movements for {{ product.name }}.</p>
+    </div>
+    <a href="{{ url_for('inventory.details', product_id=product.id) }}" class="btn btn-light rounded-3 border">Back to Product</a>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        {% if transactions %}
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Quantity</th>
+                        <th>Reference</th>
+                        <th>Reason</th>
+                        <th>Recorded By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ transaction.transaction_type }}</td>
+                        <td>{{ transaction.quantity }} {{ product.get_unit_symbol() }}</td>
+                        <td>{{ transaction.reference_type or 'Manual' }}</td>
+                        <td>{{ transaction.reason or '-' }}</td>
+                        <td>{{ transaction.created_by.full_name if transaction.created_by else 'System' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center p-5 text-muted">
+            <i class="bi bi-hourglass-split fs-2 mb-3"></i>
+            <p class="mb-0">No stock transactions have been recorded for this item yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

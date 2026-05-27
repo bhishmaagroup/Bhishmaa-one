@@ -1,0 +1,240 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Salary Slip #{{ slip.slip_number }} - Bhishmaa One{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #payslipPrintArea, #payslipPrintArea * {
+            visibility: visible;
+        }
+        #payslipPrintArea {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            border: 0 !important;
+            box-shadow: none !important;
+        }
+        .no-print {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('hrm.list_attendance') }}">HRMS</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('hrm.list_payroll') }}">Payroll Ledger</a></li>
+<li class="breadcrumb-item active" aria-current="page">Payslip #{{ slip.slip_number }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3 no-print">
+    <div>
+        <h2 class="fw-bold tracking-tight mb-1 text-main"><i class="bi bi-file-earmark-text me-2"></i>Staff Payslip Details</h2>
+        <p class="text-muted small mb-0">Official staff salary receipt and corporate payout voucher</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('hrm.list_payroll') }}" class="btn btn-light border rounded-3 px-3 fw-semibold">
+            <i class="bi bi-arrow-left me-1"></i> Back to Ledger
+        </a>
+        <button type="button" class="btn btn-indigo rounded-3 px-3 fw-semibold" onclick="window.print()">
+            <i class="bi bi-printer me-1"></i> Print Payslip
+        </button>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 max-w-4xl mx-auto border" id="payslipPrintArea">
+    <div class="card-body p-5">
+        <!-- Corporate Brand Header -->
+        <div class="row align-items-center border-bottom pb-4 mb-4">
+            <div class="col-sm-6">
+                <h4 class="fw-black text-indigo tracking-tight mb-1">
+                    {{ current_user.organization.name|upper }}
+                </h4>
+                {% if org_detail %}
+                    <p class="text-muted small mb-0 font-monospace">GSTIN: {{ org_detail.gstin or 'N/A' }}</p>
+                    <p class="text-muted small mb-0">{{ org_detail.address or '' }}</p>
+                {% else %}
+                    <p class="text-muted small mb-0">Bhishmaa Group Enterprise Tenant Client</p>
+                {% endif %}
+            </div>
+            <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
+                <h3 class="fw-bold text-main mb-1">SALARY SLIP</h3>
+                <span class="badge bg-indigo-light text-indigo px-3 py-1.5 rounded-pill font-monospace small mb-2"># {{ slip.slip_number }}</span>
+                <div>
+                    {% if slip.status == 'Paid' %}
+                        <span class="badge bg-success text-white px-3 py-1 rounded-pill small fw-bold">PAID</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark px-3 py-1 rounded-pill small fw-bold">UNPAID (DRAFT)</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Info Grid -->
+        <div class="row g-3 mb-4 bg-light rounded-3 p-4">
+            <div class="col-md-6">
+                <h6 class="fw-bold text-muted small uppercase tracking-wider mb-2">Staff Employee Details</h6>
+                <table class="table table-sm table-borderless mb-0">
+                    <tr>
+                        <td class="text-muted small py-1" style="width: 130px;">Employee Name:</td>
+                        <td class="fw-semibold text-main small py-1">{{ slip.user.first_name }} {{ slip.user.last_name }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted small py-1">Designation:</td>
+                        <td class="text-main small py-1">{{ slip.user.detail.designation if (slip.user.detail and slip.user.detail.designation) else 'Staff' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted small py-1">Department:</td>
+                        <td class="text-main small py-1">{{ slip.user.detail.department if (slip.user.detail and slip.user.detail.department) else 'Operations' }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h6 class="fw-bold text-muted small uppercase tracking-wider mb-2">Payment Period & Dates</h6>
+                <table class="table table-sm table-borderless mb-0">
+                    <tr>
+                        <td class="text-muted small py-1" style="width: 130px;">For Month/Year:</td>
+                        <td class="fw-semibold text-main small py-1">
+                            {{ ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][slip.month - 1] }} {{ slip.year }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted small py-1">Generated Date:</td>
+                        <td class="text-main small py-1">{{ slip.created_at.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                    {% if slip.status == 'Paid' %}
+                        <tr>
+                            <td class="text-muted small py-1">Payment Date:</td>
+                            <td class="text-main small py-1">{{ slip.payment_date }} (via {{ slip.payment_mode }})</td>
+                        </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        <!-- Attendance Stats Summary -->
+        <div class="row g-2 mb-4 text-center">
+            <div class="col-3">
+                <div class="border rounded-3 p-2 bg-white">
+                    <span class="text-muted small d-block">Present Days</span>
+                    <strong class="text-success fs-5">{{ slip.present_days }}</strong>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="border rounded-3 p-2 bg-white">
+                    <span class="text-muted small d-block">LOP Absent Days</span>
+                    <strong class="text-danger fs-5">{{ slip.absent_days }}</strong>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="border rounded-3 p-2 bg-white">
+                    <span class="text-muted small d-block">On-Leave Days</span>
+                    <strong class="text-info fs-5">{{ slip.leave_days }}</strong>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="border rounded-3 p-2 bg-white">
+                    <span class="text-muted small d-block">Work Period Days</span>
+                    <strong class="text-main fs-5">30.0</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Earnings & Deductions Splits Table -->
+        <div class="row g-4 mb-4">
+            <!-- Earnings Table -->
+            <div class="col-md-6">
+                <h6 class="fw-bold text-main uppercase tracking-wider mb-2"><i class="bi bi-plus-circle text-success me-1"></i>Earnings & Allowances</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Description</th>
+                                <th class="text-end">Amount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="small">Basic Monthly Salary</td>
+                                <td class="text-end small">₹ {{ slip.basic_salary }}</td>
+                            </tr>
+                            <tr>
+                                <td class="small">Bonuses & Allowances</td>
+                                <td class="text-end small">₹ {{ slip.allowances }}</td>
+                            </tr>
+                            <tr class="table-light fw-bold text-main">
+                                <td>Gross Earnings</td>
+                                <td class="text-end">₹ {{ slip.basic_salary + slip.allowances }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Deductions Table -->
+            <div class="col-md-6">
+                <h6 class="fw-bold text-main uppercase tracking-wider mb-2"><i class="bi bi-dash-circle text-danger me-1"></i>Deductions & Losses</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Description</th>
+                                <th class="text-end">Amount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set lop_deduction = (slip.basic_salary|float / 30.0) * slip.absent_days|float %}
+                            {% set manual_deduction = slip.deductions|float - lop_deduction %}
+                            <tr>
+                                <td class="small">Unpaid Leaves Loss (LOP)</td>
+                                <td class="text-end small">₹ {{ lop_deduction|round(2) }}</td>
+                            </tr>
+                            <tr>
+                                <td class="small">Manual Reductions / Taxes / Penalties</td>
+                                <td class="text-end small">₹ {{ (manual_deduction if manual_deduction >= 0 else 0.0)|round(2) }}</td>
+                            </tr>
+                            <tr class="table-light fw-bold text-main">
+                                <td>Total Deductions</td>
+                                <td class="text-end">₹ {{ slip.deductions }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Net Payable Amount Highlight -->
+        <div class="bg-indigo-light text-indigo rounded-4 p-4 d-flex justify-content-between align-items-center mb-5 border border-indigo">
+            <div>
+                <h5 class="fw-bold mb-0">NET PAYABLE AMOUNT (ROUNDED)</h5>
+                <span class="text-muted small">Paid in words: Indian Rupees Only</span>
+            </div>
+            <div class="text-end">
+                <h2 class="fw-black mb-0 fs-1">₹ {{ slip.net_salary }}</h2>
+            </div>
+        </div>
+
+        <!-- Signatures Row -->
+        <div class="row pt-5 align-items-end text-center">
+            <div class="col-6">
+                <div class="border-top mx-4 pt-2">
+                    <span class="text-muted small">Employee Signature</span>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="border-top mx-4 pt-2">
+                    <span class="text-muted small">Authorised Employer Signatory</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

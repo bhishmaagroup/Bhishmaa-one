@@ -1,0 +1,156 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Add Staff Member - Bhishmaa One{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('users.list_users') }}">Users</a></li>
+<li class="breadcrumb-item active" aria-current="page">Add Staff</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-lg-10">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-transparent border-0 px-4 pt-4">
+                <h5 class="fw-bold mb-1 text-main">Onboard Staff Member</h5>
+                <p class="text-muted small mb-0">Create credentials and assign billing and operations designations</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="section-divider-title mb-3">Identity Profiles</div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="username" class="form-label fw-medium small">Username</label>
+                            {{ form.username(class="form-control rounded-3", placeholder="Select username") }}
+                            {% for error in form.username.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label fw-medium small">Email Address</label>
+                            {{ form.email(class="form-control rounded-3", placeholder="staff@business.com") }}
+                            {% for error in form.email.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label fw-medium small">First Name</label>
+                            {{ form.first_name(class="form-control rounded-3", placeholder="Enter first name") }}
+                            {% for error in form.first_name.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label fw-medium small">Last Name</label>
+                            {{ form.last_name(class="form-control rounded-3", placeholder="Enter last name") }}
+                            {% for error in form.last_name.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label fw-medium small">Phone Number</label>
+                            {{ form.phone(class="form-control rounded-3", placeholder="Enter phone number") }}
+                            {% for error in form.phone.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="roles" class="form-label fw-medium small">Assign Roles (RBAC)</label>
+                            {{ form.roles(class="form-select rounded-3", multiple=True) }}
+                            {% for error in form.roles.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                            <span class="text-muted small mt-1 d-block">Press Ctrl / Cmd to select multiple roles.</span>
+                        </div>
+                    </div>
+
+                    <div class="section-divider-title my-3">Designation & Payroll Settings</div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="designation" class="form-label fw-medium small">Designation</label>
+                            {{ form.designation(class="form-select rounded-3") }}
+                            {% for error in form.designation.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="department" class="form-label fw-medium small">Department</label>
+                            {{ form.department(class="form-select rounded-3") }}
+                            {% for error in form.department.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="basic_salary" class="form-label fw-medium small">Basic Monthly Salary (₹)</label>
+                            {{ form.basic_salary(class="form-control rounded-3", placeholder="e.g. 15000.00") }}
+                            {% for error in form.basic_salary.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="address" class="form-label fw-medium small">Residential Address</label>
+                        {{ form.address(class="form-control rounded-3", rows="3", placeholder="Enter address details") }}
+                        {% for error in form.address.errors %}
+                            <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{{ url_for('users.list_users') }}" class="btn btn-light rounded-3 px-4 border fw-semibold">Cancel</a>
+                        {{ form.submit(class="btn btn-indigo rounded-3 px-4 fw-semibold") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const firstNameInput = document.getElementById('first_name');
+        const lastNameInput = document.getElementById('last_name');
+        const usernameInput = document.getElementById('username');
+        const emailInput = document.getElementById('email');
+
+        function autoGenerateCredentials() {
+            const fn = firstNameInput.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+            const ln = lastNameInput.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+            const rawOrg = "{{ current_user.organization.name if current_user.organization else 'bhishmaa' }}";
+            const orgClean = rawOrg.toLowerCase().trim().replace(/[^a-z0-9]/g, '') || 'bhishmaa';
+            
+            if (fn) {
+                const autoUsername = ln ? `${fn}_${ln}` : fn;
+                if (!usernameInput.dataset.edited) {
+                    usernameInput.value = autoUsername;
+                }
+                if (!emailInput.dataset.edited) {
+                    emailInput.value = `${autoUsername}@${orgClean}.com`;
+                }
+            }
+        }
+
+        firstNameInput.addEventListener('input', autoGenerateCredentials);
+        lastNameInput.addEventListener('input', autoGenerateCredentials);
+
+        usernameInput.addEventListener('input', () => {
+            usernameInput.dataset.edited = "true";
+        });
+        emailInput.addEventListener('input', () => {
+            emailInput.dataset.edited = "true";
+        });
+    });
+</script>
+{% endblock %}

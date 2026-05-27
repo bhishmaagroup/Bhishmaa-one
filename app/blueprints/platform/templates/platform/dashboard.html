@@ -1,0 +1,397 @@
+{% extends 'layouts/platform_base.html' %}
+
+{% block title %}SaaS Platform Command Center - Bhishmaa One{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="fw-extrabold text-white mb-1 tracking-tight text-gradient-indigo">SaaS Platform Command Center</h4>
+            <p class="text-muted small mb-0">Bhishmaa One Global Network Operations & Subscriptions analytics</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-dark border border-secondary text-muted px-3 py-2 rounded-3 small">
+                <i class="bi bi-cpu me-1 text-indigo"></i> Systems Online
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Primary Metrics Row -->
+<div class="row g-4 mb-4">
+    <!-- Total Tenants KPI Widget -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card platform-card h-100 border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="text-uppercase text-muted fw-bold small tracking-wider">Total Tenants</span>
+                    <div class="stat-badge bg-indigo-light text-indigo">
+                        <i class="bi bi-building"></i>
+                    </div>
+                </div>
+                <h2 class="fw-bold mb-1 text-white text-gradient-indigo">{{ metrics.total_organizations }}</h2>
+                <div class="d-flex align-items-center text-success small fw-semibold mt-2">
+                    <span class="status-dot active me-2"></span>
+                    <span>{{ metrics.active_organizations }} Active Client ERPs</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gross Sales Widget -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card platform-card h-100 border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="text-uppercase text-muted fw-bold small tracking-wider">Gross Sales</span>
+                    <div class="stat-badge text-success" style="background-color: rgba(16, 185, 129, 0.1);">
+                        <i class="bi bi-cash-coin"></i>
+                    </div>
+                </div>
+                <h2 class="fw-bold mb-1 text-white text-gradient-green">₹{{ "{:,.2f}".format(metrics.gross_sales) }}</h2>
+                <div class="text-muted small mt-2">
+                    <i class="bi bi-file-text me-1 text-success"></i> Across {{ metrics.total_invoices }} client invoices
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Staff Users Widget -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card platform-card h-100 border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="text-uppercase text-muted fw-bold small tracking-wider">Total Users</span>
+                    <div class="stat-badge text-info" style="background-color: rgba(6, 182, 212, 0.1);">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+                <h2 class="fw-bold mb-1 text-white text-gradient-cyan">{{ metrics.total_users }}</h2>
+                <div class="text-muted small mt-2">
+                    <i class="bi bi-person-badge-fill me-1 text-info"></i> Active staff accounts enrolled
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Subscriptions Ratio -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card platform-card h-100 border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="text-uppercase text-muted fw-bold small tracking-wider">Conversion Rate</span>
+                    <div class="stat-badge text-warning" style="background-color: rgba(245, 158, 11, 0.1);">
+                        <i class="bi bi-arrow-up-right-circle"></i>
+                    </div>
+                </div>
+                {% set paid_count = metrics.premium_plans + metrics.basic_plans %}
+                {% set ratio = (paid_count / metrics.total_organizations * 100) if metrics.total_organizations > 0 else 0 %}
+                <h2 class="fw-bold mb-1 text-white text-gradient-orange">{{ "{:.1f}%".format(ratio) }}</h2>
+                <div class="text-muted small mt-2">
+                    <i class="bi bi-star-fill me-1 text-warning"></i> {{ paid_count }} paid / {{ metrics.free_plans }} free
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Plan Distribution and Quick Actions -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card platform-card border-0 h-100">
+            <div class="card-header bg-transparent border-bottom border-secondary d-flex align-items-center justify-content-between py-3">
+                <h6 class="card-title fw-bold mb-0 text-white"><i class="bi bi-pie-chart me-2 text-indigo"></i>Tenant Subscription Breakdown</h6>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4 align-items-center">
+                    <div class="col-md-6">
+                        <div class="d-flex flex-column gap-4">
+                            <div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-white fw-semibold small">Premium Plans</span>
+                                    <span class="text-muted small fw-bold">{{ metrics.premium_plans }} / {{ metrics.total_organizations }}</span>
+                                </div>
+                                <div class="progress bg-dark" style="height: 10px; border-radius: 6px;">
+                                    <div class="progress-bar bg-warning progress-glow" role="progressbar" style="width: {{ metrics.premium_plans/metrics.total_organizations*100 if metrics.total_organizations > 0 else 0 }}%; border-radius: 6px;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-white fw-semibold small">Basic Plans</span>
+                                    <span class="text-muted small fw-bold">{{ metrics.basic_plans }} / {{ metrics.total_organizations }}</span>
+                                </div>
+                                <div class="progress bg-dark" style="height: 10px; border-radius: 6px;">
+                                    <div class="progress-bar bg-indigo progress-glow" role="progressbar" style="width: {{ metrics.basic_plans/metrics.total_organizations*100 if metrics.total_organizations > 0 else 0 }}%; border-radius: 6px;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-white fw-semibold small">Free Plans</span>
+                                    <span class="text-muted small fw-bold">{{ metrics.free_plans }} / {{ metrics.total_organizations }}</span>
+                                </div>
+                                <div class="progress bg-dark" style="height: 10px; border-radius: 6px;">
+                                    <div class="progress-bar bg-secondary" role="progressbar" style="width: {{ metrics.free_plans/metrics.total_organizations*100 if metrics.total_organizations > 0 else 0 }}%; border-radius: 6px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 border-start border-secondary d-none d-md-block text-center py-4">
+                        <div class="p-3">
+                            <i class="bi bi-hdd-network fs-1 text-indigo mb-3 d-block opacity-75"></i>
+                            <h6 class="fw-semibold text-white mb-2">Centralized Multitenancy</h6>
+                            <p class="text-muted small mb-0 lh-base px-2">Client databases leverage scoped logical row partitioning to enforce strict workspace isolation and data integrity.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card platform-card border-0 h-100">
+            <div class="card-header bg-transparent border-bottom border-secondary py-3">
+                <h6 class="card-title fw-bold mb-0 text-white"><i class="bi bi-lightning-charge me-2 text-indigo"></i>Operations Control Panel</h6>
+            </div>
+            <div class="card-body p-4 d-flex flex-column gap-3 justify-content-center">
+                <a href="{{ url_for('platform.organizations') }}" class="btn btn-indigo py-3 rounded-3 d-flex align-items-center justify-content-between border-0 shadow-sm shadow-indigo">
+                    <span class="fw-semibold"><i class="bi bi-building-add me-2"></i>Onboard New Client ERP</span>
+                    <i class="bi bi-arrow-right-short fs-4"></i>
+                </a>
+                <a href="{{ url_for('platform.organizations') }}" class="btn btn-dark border border-secondary py-3 rounded-3 d-flex align-items-center justify-content-between">
+                    <span class="fw-semibold text-white"><i class="bi bi-sliders me-2"></i>Manage Business Tenants</span>
+                    <i class="bi bi-chevron-right small"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Organizations and System Audit Trails -->
+<div class="row g-4">
+    <div class="col-xl-6">
+        <div class="card platform-card border-0">
+            <div class="card-header bg-transparent border-bottom border-secondary d-flex align-items-center justify-content-between py-3">
+                <h6 class="card-title fw-bold mb-0 text-white"><i class="bi bi-building-up me-2 text-indigo"></i>Recent Client Signups</h6>
+                <a href="{{ url_for('platform.organizations') }}" class="btn btn-link text-indigo text-decoration-none small p-0">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark-custom mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th>Company</th>
+                                <th>Subdomain</th>
+                                <th>Plan</th>
+                                <th>Status</th>
+                                <th class="text-end">Onboarded</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for org in metrics.recent_organizations %}
+                                <tr>
+                                    <td class="fw-semibold text-white">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-building text-muted opacity-50"></i>
+                                            <span>{{ org.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td><code>{{ org.subdomain }}.bhishmaa.one</code></td>
+                                    <td>
+                                        <span class="badge {% if org.plan_name == 'Premium' %}bg-warning text-dark{% elif org.plan_name == 'Basic' %}bg-info text-dark{% else %}bg-secondary text-white{% endif %}">
+                                            {{ org.plan_name }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if org.is_active %}
+                                            <span class="d-flex align-items-center gap-1.5 small text-success fw-medium">
+                                                <span class="status-dot active"></span> Active
+                                            </span>
+                                        {% else %}
+                                            <span class="d-flex align-items-center gap-1.5 small text-danger fw-medium">
+                                                <span class="status-dot suspended"></span> Suspended
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end text-muted small">{{ org.created_at.strftime('%d %b %Y') }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted small">
+                                        <i class="bi bi-building-slash fs-2 mb-2 d-block opacity-20"></i>
+                                        No organizations registered yet.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="card platform-card border-0">
+            <div class="card-header bg-transparent border-bottom border-secondary py-3">
+                <h6 class="card-title fw-bold mb-0 text-white"><i class="bi bi-clock-history me-2 text-indigo"></i>Global Operations Audit Trail</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+                    <table class="table table-dark-custom mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Operator</th>
+                                <th>Action</th>
+                                <th>IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for audit in metrics.recent_audits %}
+                                <tr>
+                                    <td class="text-muted small">{{ audit.created_at.strftime('%d-%b %H:%M:%S') }}</td>
+                                    <td>
+                                        {% if audit.platform_user_id %}
+                                            <span class="text-indigo fw-semibold"><i class="bi bi-shield-shaded me-1"></i>Admin</span>
+                                        {% elif audit.user %}
+                                            <span class="text-white"><i class="bi bi-person me-1"></i>{{ audit.user.username }}</span>
+                                        {% else %}
+                                            <span class="text-muted">System</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if 'SUSPEND' in audit.action or 'DELETE' in audit.action %}bg-danger-light text-danger{% elif 'REGISTER' in audit.action or 'LOGIN' in audit.action %}bg-success-light text-success{% else %}bg-indigo-light text-indigo{% endif %} font-monospace small" style="font-size: 0.7rem; padding: 3px 6px;">
+                                            {{ audit.action }}
+                                        </span>
+                                    </td>
+                                    <td class="text-muted small">{{ audit.ip_address or 'Local' }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted small">
+                                        <i class="bi bi-clock-history fs-2 mb-2 d-block opacity-20"></i>
+                                        No audit logs available.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Premium Modern Dashboard Styles Override */
+    .platform-card {
+        background: rgba(30, 41, 59, 0.45) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-radius: 16px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2) !important;
+    }
+    .platform-card:hover {
+        transform: translateY(-5px) !important;
+        border-color: rgba(99, 102, 241, 0.4) !important;
+        box-shadow: 0 12px 30px rgba(99, 102, 241, 0.15) !important;
+    }
+    .stat-badge {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+    }
+    .bg-indigo-light {
+        background-color: rgba(99, 102, 241, 0.1) !important;
+        color: #818cf8 !important;
+    }
+    .btn-indigo {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+        color: white !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+    .btn-indigo:hover {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
+        transform: scale(1.02) !important;
+    }
+    .shadow-indigo {
+        box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.35) !important;
+    }
+    .text-gradient-indigo {
+        background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .text-gradient-green {
+        background: linear-gradient(135deg, #a7f3d0 0%, #10b981 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .text-gradient-cyan {
+        background: linear-gradient(135deg, #cffafe 0%, #06b6d4 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .text-gradient-orange {
+        background: linear-gradient(135deg, #ffedd5 0%, #f97316 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .table-dark-custom {
+        background: transparent;
+    }
+    .table-dark-custom th {
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #64748b;
+        font-weight: 700;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 14px 16px;
+    }
+    .table-dark-custom td {
+        padding: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        color: #cbd5e1;
+        font-size: 13.5px;
+    }
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .status-dot.active {
+        background-color: #10b981;
+        box-shadow: 0 0 8px #10b981;
+    }
+    .status-dot.suspended {
+        background-color: #ef4444;
+        box-shadow: 0 0 8px #ef4444;
+    }
+    .progress-glow {
+        box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
+    }
+    .bg-success-light {
+        background-color: rgba(16, 185, 129, 0.08) !important;
+        color: #34d399 !important;
+    }
+    .bg-danger-light {
+        background-color: rgba(239, 68, 68, 0.08) !important;
+        color: #f87171 !important;
+    }
+    .bg-indigo-light {
+        background-color: rgba(99, 102, 241, 0.08) !important;
+        color: #818cf8 !important;
+    }
+    .lh-base {
+        line-height: 1.6 !important;
+    }
+</style>
+{% endblock %}

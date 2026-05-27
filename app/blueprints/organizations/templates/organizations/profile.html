@@ -1,0 +1,72 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Business Profile - Bhishmaa One{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('organizations.profile') }}">Organizations</a></li>
+<li class="breadcrumb-item active" aria-current="page">Profile</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4 mt-3">
+    <!-- Navigation Sidebar Profile Links -->
+    <div class="col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-3">
+                <div class="nav flex-column nav-pills gap-1">
+                    <a class="nav-link active rounded-3 py-2 px-3 fw-semibold" href="{{ url_for('organizations.profile') }}">
+                        <i class="bi bi-building me-2"></i> Business Profile
+                    </a>
+                    <a class="nav-link rounded-3 py-2 px-3 fw-semibold text-main" href="{{ url_for('organizations.billing_settings') }}">
+                        <i class="bi bi-receipt me-2"></i> GST & Billing Settings
+                    </a>
+                    <a class="nav-link rounded-3 py-2 px-3 fw-semibold text-main" href="{{ url_for('organizations.subscription') }}">
+                        <i class="bi bi-shield-lock me-2"></i> Subscription Plan
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Panel Form -->
+    <div class="col-lg-9">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-transparent border-0 px-4 pt-4">
+                <h5 class="fw-bold mb-1 text-main">Business Profile Details</h5>
+                <p class="text-muted small mb-0">Configure your business tenant credentials</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label fw-medium small">Business Name</label>
+                            {{ form.name(class="form-control rounded-3", placeholder="e.g. Bhishmaa Distributors") }}
+                            {% for error in form.name.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="subdomain" class="form-label fw-medium small">Subdomain Prefix</label>
+                            <div class="input-group">
+                                {{ form.subdomain(class="form-control rounded-3-start", placeholder="e.g. bhishmaa") }}
+                                <span class="input-group-text bg-light rounded-3-end border-start-0 small text-muted">.bhishmaa.one</span>
+                            </div>
+                            {% for error in form.subdomain.errors %}
+                                <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                            {% endfor %}
+                            <span class="text-muted small mt-1 d-block">Warning: Changing this slug will affect login links.</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        {{ form.submit(class="btn btn-indigo rounded-3 px-4 fw-semibold") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,192 @@
+<USER_REQUEST>
+You are a world-class SaaS architect, enterprise Flask developer, PostgreSQL expert, UI/UX engineer, and scalable ERP system designer.
+
+You are building a REAL production-grade SaaS platform.
+
+========================================================
+PROJECT NAME
+========================================================
+
+Bhishmaa One
+
+========================================================
+COMPANY
+========================================================
+
+Bhishmaa Group
+
+========================================================
+PROJECT TYPE
+========================================================
+
+Multi-Tenant Business Operating System (SaaS)
+
+========================================================
+TARGET USERS
+========================================================
+
+Build the platform for:
+
+- Local Businesses
+- Small Businesses
+- Coaching Centers
+- Retail Shops
+- Restaurants
+- Agencies
+- Medical Stores
+- Service Providers
+- Distributors
+
+========================================================
+MAIN PRODUCT GOAL
+========================================================
+
+Bhishmaa One should help businesses manage:
+
+- billing
+- invoices
+- inventory
+- stock
+- customers
+- suppliers
+- staff
+- attendance
+- expenses
+- payments
+- reports
+- notifications
+- operations
+
+from ONE dashboard.
+
+The product should feel:
+- modern
+- clean
+- premium
+- mobile friendly
+- fast
+- easy for non-technical business owners
+
+========================================================
+VERY IMPORTANT DEVELOPMENT RULES
+========================================================
+
+1. NEVER generate incomplete modules.
+2. NEVER skip templates.
+3. NEVER skip CSS or JS.
+4. NEVER leave placeholders.
+5. NEVER write TODO comments.
+6. NEVER create giant files.
+7. NEVER mix business logic inside routes.
+8. ALWAYS generate production-ready code.
+9. ALWAYS use modular architecture.
+10. ALWAYS generate responsive UI.
+
+========================================================
+STRICT OUTPUT CONTRACT
+======================================================
+<truncated 9132 bytes>
+ction
+- XSS protection
+- SQL injection protection
+- upload validation
+- password hashing
+- secure sessions
+- rate limiting
+- secure headers
+- OTP expiry
+
+========================================================
+OFFLINE MODE
+========================================================
+
+Support SQLite offline mode for:
+- local business installations
+- demo mode
+- temporary offline usage
+
+========================================================
+SUPER ADMIN FEATURES
+========================================================
+
+Super Admin can:
+- manage organizations
+- manage plans
+- manage subscriptions
+- suspend businesses
+- view analytics
+- monitor revenue
+- monitor audit logs
+
+========================================================
+SUBSCRIPTION SYSTEM
+========================================================
+
+Plans:
+- Free
+- Starter
+- Business
+- Premium
+
+Support:
+- trial period
+- invoice limits
+- staff limits
+- module restrictions
+- expiry tracking
+
+========================================================
+API SYSTEM
+========================================================
+
+Generate REST APIs for major modules.
+
+Support:
+- JWT auth
+- pagination
+- filtering
+- versioning
+- rate limiting
+
+========================================================
+VERY IMPORTANT FINAL RULE
+========================================================
+
+Generate the project STEP-BY-STEP.
+
+DO NOT generate the entire project in one response.
+
+FIRST generate:
+1. complete folder structure
+2. database schema
+3. Flask app initialization
+4. config system
+5. extensions.py
+6. base templates
+7. reusable components
+8. dashboard layout
+
+THEN generate modules one-by-one.
+
+For EVERY module generate:
+- backend
+- frontend
+- templates
+- CSS
+- JS
+- APIs
+- forms
+- permissions
+- validations
+
+NEVER skip templates.
+
+NEVER skip frontend assets.
+
+NEVER leave incomplete code.
+
+The final project must feel like a REAL commercial SaaS platform, not a student project.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-05-26T17:33:41+05:30.
+</ADDITIONAL_METADATA>

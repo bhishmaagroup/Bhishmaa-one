@@ -1,0 +1,11 @@
+# Auth Module Constants
+
+OTP_EXPIRY_MINUTES = 10
+OTP_MAX_ATTEMPTS = 3
+SESSION_EXPIRY_DAYS = 30
+PASSWORD_RESET_TOKEN_EXPIRY_MINUTES = 60
+
+# Verification Actions
+PURPOSE_LOGIN = 'login'
+PURPOSE_EMAIL_VERIFY = 'verify_email'
+PURPOSE_PASSWORD_RESET = 'reset_password'

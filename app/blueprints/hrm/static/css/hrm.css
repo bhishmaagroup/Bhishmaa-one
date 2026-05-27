@@ -1,0 +1,60 @@
+/* HRMS Module Stylesheet */
+.avatar-circle-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: 700;
+}
+
+.bg-orange-light {
+    background-color: rgba(249, 115, 22, 0.12) !important;
+}
+
+.text-orange {
+    color: rgb(249, 115, 22) !important;
+}
+
+.bg-indigo-light {
+    background-color: rgba(99, 102, 241, 0.08) !important;
+}
+
+.text-indigo {
+    color: rgb(99, 102, 241) !important;
+}
+
+.border-indigo {
+    border-color: rgba(99, 102, 241, 0.25) !important;
+}
+
+.bg-success-light {
+    background-color: rgba(34, 197, 94, 0.12) !important;
+}
+
+.text-success {
+    color: rgb(34, 197, 94) !important;
+}
+
+.bg-danger-light {
+    background-color: rgba(239, 68, 68, 0.12) !important;
+}
+
+.text-danger {
+    color: rgb(239, 68, 68) !important;
+}
+
+.bg-warning-light {
+    background-color: rgba(234, 179, 8, 0.12) !important;
+}
+
+.text-warning {
+    color: rgb(234, 179, 8) !important;
+}
+
+.bg-info-light {
+    background-color: rgba(6, 182, 212, 0.12) !important;
+}
+
+.text-info {
+    color: rgb(6, 182, 212) !important;
+}

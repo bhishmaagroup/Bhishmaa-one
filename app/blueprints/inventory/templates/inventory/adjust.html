@@ -1,0 +1,54 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Adjust Stock - {{ product.name }}{% endblock %}
+
+{% block breadcrumbs_active %}
+<li class="breadcrumb-item"><a href="{{ url_for('inventory.list_products') }}">Inventory</a></li>
+<li class="breadcrumb-item active" aria-current="page">Adjust Stock</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-transparent border-0 px-4 pt-4">
+                <h5 class="fw-bold mb-1 text-main">Adjust Product Stock Level</h5>
+                <p class="text-muted small mb-0">Record instant increment or decrement to adjust ledger records</p>
+            </div>
+            <div class="card-body p-4">
+                
+                <div class="bg-light p-3 rounded-3 mb-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold text-main mb-1">{{ product.name }}</h6>
+                        <span class="text-muted small font-monospace">#SKU: {{ product.sku }}</span>
+                    </div>
+                    <div class="text-end">
+                        <span class="text-muted small d-block">Current Stock:</span>
+                        <h4 class="fw-black text-indigo mb-0">{{ product.current_stock }} {{ product.get_unit_symbol() }}</h4>
+                    </div>
+                </div>
+
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-4">
+                        <label for="quantity_change" class="form-label fw-semibold text-main small">Adjust Quantity</label>
+                        {{ form.quantity_change(class="form-control rounded-3 form-control-lg", placeholder="e.g. 50 to add, -10 to remove", type="number", step="any") }}
+                        <span class="text-muted small mt-2 d-block">
+                            <i class="bi bi-info-circle me-1"></i>Input a positive number to record stock replenishment, or a negative number to record stock shrinkage/breakage.
+                        </span>
+                        {% for error in form.quantity_change.errors %}
+                            <span class="text-danger small mt-1 d-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{{ url_for('inventory.list_products') }}" class="btn btn-light rounded-3 px-4 border fw-semibold">Cancel</a>
+                        {{ form.submit(class="btn btn-indigo rounded-3 px-4 fw-semibold") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
